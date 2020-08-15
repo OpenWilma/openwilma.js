@@ -19,8 +19,8 @@ class Parser {
     } else if (typeof module === 'object' && module.exports) {
         module.exports = factory()
     } else {
-        root.returnExports = factory()
-  }
+        parser = new Parser()
+    }
 }(typeof self !== 'undefined' ? self : this, function () {
     return new Parser()
 }));

@@ -1,11 +1,10 @@
-<script type="module" src="nl"></script>
+<script src="http://esinko.net/downloads/openwilma/OpenWilma.js"></script>
 <script>
-    import { OpenWilma } from "./OpenWilma.js"
-    let session = new wilma()
-
+    let session = new OpenWilma()
+    
     session._checkUrl().then(async res => {
         console.log("Compatible runtime!")
     }).catch(async err => {
-        console.log("Unsupported runtime: " + err)
+        console.log("Unsupported runtime: ", err)
     })
 </script>

@@ -189,14 +189,14 @@ class OpenWilma {
     if (typeof define === 'function' && define.amd) {
         define([], factory)
     } else if (typeof module === 'object' && module.exports) {
-        parser = require("./bin/parser.js")
-        request = require("./bin/requestNode.js")
+        parser = require("../bin/parser.js")
+        request = require("../bin/requestNode.js")
         module.exports = factory()
     } else {
-        parser = import("./bin/parser.js")
-        request = import("./bin/requestBrowser.js")
+        document.write('<' + 'script src="' + "../bin/parser.js" + '"' + ' type="text/javascript"><' + '/script>');
+        document.write('<' + 'script src="' + "../bin/requestBrowser.js" + '"' +' type="text/javascript"><' + '/script>');
         root.returnExports = factory()
-  }
+    }
 }(typeof self !== 'undefined' ? self : this, function () {
     return OpenWilma
 }));

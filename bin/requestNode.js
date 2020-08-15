@@ -153,8 +153,8 @@ class Request {
     } else if (typeof module === 'object' && module.exports) {
         module.exports = factory()
     } else {
-        root.returnExports = factory()
-  }
+        request = new Request()
+    }
 }(typeof self !== 'undefined' ? self : this, function () {
     return new Request()
 }));
