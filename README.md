@@ -1,1 +1,3 @@
-# openwilma.js
+# JS library for OpenWilma
+
+To-Do list:
