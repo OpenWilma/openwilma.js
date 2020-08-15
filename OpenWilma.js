@@ -1,14 +1,174 @@
-// Modules (These get replaced with the appropriate module class)
+// -- Modules --
+// (These get replaced with the appropriate module class)
 let parser = null
 let request = null
+
+// -- memory --
+let cache = {
+    token: null,
+    sessionId: null,
+    messages: null
+    //..etc (cache results)
+}
+
+// -- Classes --
+class messages {
+    async get(id){
+
+    }
+    async getAll(category){
+
+    }
+    async send(){
+
+    }
+}
+class message {
+    constructor(){
+
+    }
+    async markAsRead(){
+
+    }
+    async archive(){
+
+    }
+    async unArchive(){
+
+    }
+    async delete(){
+
+    }
+}
+class schedule {
+    async get(date){
+
+    }
+    async getCurrent(){
+
+    }
+}
+class choices {
+    //No idea what needed here
+}
+class exams {
+    async get(id){
+
+    }
+    async getAll(){
+
+    }
+}
+class attendence {
+    async get(id){
+
+    }
+    async getAll(){
+
+    }
+}
+class attendenceSingle {
+    //Actions per attendence note, no idea what goes here tho
+}
+class printouts {
+    async getAll(){
+
+    }
+}
+class feedback {
+    //No idea what goes here
+}
+class enrollment {
+    //No idea what goes here
+}
+class trays {
+    async getAll(){
+
+    }
+    async get(period){
+
+    }
+    async set(period, position, boolean){
+        
+    }
+}
+class news {
+    async list(){
+
+    }
+    async getId(){
+
+    }
+}
+class catalog {
+    async get(){
+
+    }
+}
+class profile {
+    async self(){
+
+    }
+    async get(id){
+
+    }
+    async getAll(){
+
+    }
+}
+class profile_self {
+    constructor(){
+        //data here
+    }
+    async rooms(){
+
+    }
+}
+class strategy {
+    async list(){
+
+    }
+    async get(id){
+
+    }
+}
+class forms {
+    async list(){
+
+    }
+    async get(id){
+
+    }
+}
 // Main class
 class OpenWilma {
     constructor(options){
+        // Options
         this.options = options
+        // Classes
+        this.messages = new messages()
+        this.choices = new choices()
+        this.exams = new exams()
+        this.attendence = new attendence()
+        this.printouts = new printouts()
+        this.feedback = new feedback()
+        this.enrollment = new enrollment()
+        this.trays = new trays()
+        this.news = new news()
+        this.catalog = new catalog()
+        this.profile = new profile()
+        this.strategy = new strategy()
+        this.forms = new forms()
+    }
+    async login(){
+
+    }
+    async logout(){
+
     }
 }
 
-// Export
+// -- Export --
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory)
