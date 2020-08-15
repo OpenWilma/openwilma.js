@@ -1,6 +1,9 @@
 //Data parser
 class Parser {
-
+    async messages(){
+        
+    }
+    //..etc
 }
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {

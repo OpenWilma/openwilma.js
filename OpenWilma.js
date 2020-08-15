@@ -116,14 +116,6 @@ class profile {
 
     }
 }
-class profile_self {
-    constructor(){
-        //data here
-    }
-    async rooms(){
-
-    }
-}
 class strategy {
     async list(){
 
@@ -147,6 +139,7 @@ class OpenWilma {
         this.options = options
         // Classes
         this.messages = new messages()
+        this.schedule = new schedule()
         this.choices = new choices()
         this.exams = new exams()
         this.attendence = new attendence()
@@ -161,7 +154,7 @@ class OpenWilma {
         this.forms = new forms()
     }
     async login(){
-
+        
     }
     async logout(){
 
