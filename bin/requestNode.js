@@ -1,5 +1,5 @@
 // Http/Https request library for Node.Js
-module.exports = class Request {
+class Request {
     constructor(){
         this.http = require("http")
         this.https = require("https")
@@ -13,49 +13,60 @@ module.exports = class Request {
         return new Promise(async (resolve, reject) => {
             try {
                 if(typeof options == "object" && options.url != undefined){
+                    let url = null
+                    let error = false
                     try {
-                        let url = this.url.parse(options.url)
-                        if(this[url.protocol.replace(":", "")] == undefined) {
-                            reject("Unkown protocol.")
-                        }else {
-                            let req = this[url.protocol.replace(":", "")].request({
-                                host: url.host.includes(":") ? _url.host.split(":")[0] : _url.host,
-                                path: url.path,
-                                port: url.port,
-                                method: "GET",
-                                query: url.query,
-                                body: options.body,
-                                followAllRedirects: true,
-                                headers: options.headers
-                            }, async res => {
-                                let collection = ""
-                                res.on("data", async data => {
-                                    collection = collection = data
-                                })
-                                res.on("end", async () => {
-                                    resolve({
-                                        status: res.statusCode,
-                                        body: collection,
-                                        message: res.statusMessage
-                                    })
-                                })
-                            })
-                            if(options.body != undefined){
-                                let format = null
-                                try {
-                                    format = JSON.stringify(options.body)
-                                }
-                                catch(err){
-                                    reject("Cannot format the request body. Please make sure it's valid.")
-                                    return
-                                }
-                                req.write(format)
-                            }
-                            req.end()
-                        }
+                        url = this.url.parse(options.url)
                     }
                     catch(err){
-                        reject("Invalid url.")
+                        reject("Invalid Url (" + err + ").")
+                    }
+                    finally{
+                        if(error == false){
+                            try {
+                                if(this[url.protocol.replace(":", "")] == undefined) {
+                                    reject("Unkown protocol.")
+                                }else {
+                                    let req = this[url.protocol.replace(":", "")].request({
+                                        host: url.host.includes(":") ? url.host.split(":")[0] : url.host,
+                                        path: url.path,
+                                        port: url.port,
+                                        method: "GET",
+                                        query: url.query,
+                                        body: options.body,
+                                        followAllRedirects: true,
+                                        headers: options.headers
+                                    }, async res => {
+                                        let collection = ""
+                                        res.on("data", async data => {
+                                            collection = collection + data.toString()
+                                        })
+                                        res.on("end", async () => {
+                                            resolve({
+                                                status: res.statusCode,
+                                                body: collection,
+                                                message: res.statusMessage
+                                            })
+                                        })
+                                    })
+                                    if(options.body != undefined){
+                                        let format = null
+                                        try {
+                                            format = JSON.stringify(options.body)
+                                        }
+                                        catch(err){
+                                            reject("Cannot format the request body. Please make sure it's valid.")
+                                            return
+                                        }
+                                        req.write(format)
+                                    }
+                                    req.end()
+                                }
+                            }
+                            catch(err){
+                                reject(Err)
+                            }
+                        }
                     }
                 }else { 
                     reject("Invalid options. Expected to be an object, the url value is required.")
@@ -70,49 +81,61 @@ module.exports = class Request {
         return new Promise(async (resolve, reject) => {
             try {
                 if(typeof options == "object" && options.url != undefined){
+                    let url = null
+                    let error = false
                     try {
-                        let url = this.url.parse(options.url)
-                        if(this[url.protocol.replace(":", "")] == undefined) {
-                            reject("Unkown protocol.")
-                        }else {
-                            let req = this[url.protocol.replace(":", "")].request({
-                                host: url.host.includes(":") ? _url.host.split(":")[0] : _url.host,
-                                path: url.path,
-                                port: url.port,
-                                method: "POST",
-                                query: url.query,
-                                body: options.body,
-                                followAllRedirects: true,
-                                headers: options.headers
-                            }, async res => {
-                                let collection = ""
-                                res.on("data", async data => {
-                                    collection = collection = data
-                                })
-                                res.on("end", async () => {
-                                    resolve({
-                                        status: res.statusCode,
-                                        body: collection,
-                                        message: res.statusMessage
-                                    })
-                                })
-                            })
-                            if(options.body != undefined){
-                                let format = null
-                                try {
-                                    format = JSON.stringify(options.body)
-                                }
-                                catch(err){
-                                    reject("Cannot format the request body. Please make sure it's valid.")
-                                    return
-                                }
-                                req.write(format)
-                            }
-                            req.end()
-                        }
+                        url = this.url.parse(options.url)
                     }
                     catch(err){
-                        reject("Invalid url.")
+                        error = true
+                        reject("Invalid Url (" + err + ").")
+                    }
+                    finally{
+                        if(error == false){
+                            try {
+                                if(this[url.protocol.replace(":", "")] == undefined) {
+                                    reject("Unkown protocol.")
+                                }else {
+                                    let req = this[url.protocol.replace(":", "")].request({
+                                        host: url.host.includes(":") ? url.host.split(":")[0] : url.host,
+                                        path: url.path,
+                                        port: url.port,
+                                        method: "POST",
+                                        query: url.query,
+                                        body: options.body,
+                                        followAllRedirects: true,
+                                        headers: options.headers
+                                    }, async res => {
+                                        let collection = ""
+                                        res.on("data", async data => {
+                                            collection = collection + data.toString()
+                                        })
+                                        res.on("end", async () => {
+                                            resolve({
+                                                status: res.statusCode,
+                                                body: collection,
+                                                message: res.statusMessage
+                                            })
+                                        })
+                                    })
+                                    if(options.body != undefined){
+                                        let format = null
+                                        try {
+                                            format = JSON.stringify(options.body)
+                                        }
+                                        catch(err){
+                                            reject("Cannot format the request body. Please make sure it's valid.")
+                                            return
+                                        }
+                                        req.write(format)
+                                    }
+                                    req.end()
+                                }
+                            }
+                            catch(err){
+                                reject(Err)
+                            }
+                        }
                     }
                 }else { 
                     reject("Invalid options. Expected to be an object, the url value is required.")
@@ -124,3 +147,14 @@ module.exports = class Request {
         })
     }
 }
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory)
+    } else if (typeof module === 'object' && module.exports) {
+        module.exports = factory()
+    } else {
+        root.returnExports = factory()
+  }
+}(typeof self !== 'undefined' ? self : this, function () {
+    return new Request()
+}));

@@ -1,7 +1,15 @@
 //Data parser
 class Parser {
     async messages(){
-        
+
+    }
+    async format(data){
+        try {
+            return JSON.parse(data)
+        }
+        catch(err){
+            throw new Error("Invalid data recieved: " + err)
+        }
     }
     //..etc
 }
@@ -14,5 +22,5 @@ class Parser {
         root.returnExports = factory()
   }
 }(typeof self !== 'undefined' ? self : this, function () {
-    return Parser
+    return new Parser()
 }));

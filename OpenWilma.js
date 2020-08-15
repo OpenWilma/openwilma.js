@@ -7,7 +7,8 @@ let request = null
 let cache = {
     token: null,
     sessionId: null,
-    messages: null
+    messages: null,
+    servers: []
     //..etc (cache results)
 }
 
@@ -152,6 +153,28 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
+    }
+    async _checkUrl(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: "https://www.starsoft.fi/wilmat/wilmat.json",
+                }).then(async result => {
+                    if(result.status == 200){
+                        let data = await parser.format(result.body)
+                        cache.servers = data.wilmat
+                        resolve(cache.servers)
+                    }else {
+                        reject([null, result])
+                    }
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
     async login(){
         
