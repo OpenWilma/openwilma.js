@@ -9,6 +9,8 @@ let memory = {
     session: {
         token: null,
         sessionId: null,
+        server: null,
+        serverName: ""
     },
     cache: {
         messages: [],
@@ -197,12 +199,84 @@ class OpenWilma {
     }
     /**
      * Login to a Wilma server
-     * @param {String} server 
+     * @param {String} server The Wilma server
      * @param {String} username The username of the Wilma account
      * @param {String} password The password of the Wilma account
+     * @returns Promise()
      */
     async login(server, username, password){ //Login to wilma
-        
+        return new Promise(async (resolve, reject) => {
+            try {
+                this._getList().then(async res => {
+                    if(res[0] != null){
+                        reject(res[0])
+                    }else {
+                        let found = false
+                        for(let i = 0;i < res[1].length;i++){
+                            if(res[1][i].url === server){
+                                memory.session.server = server
+                                memory.session.serverName = res[1][i].name
+                                found = true
+                                console.log("Match!")
+                                break
+                            }
+                        }
+                        if(found == false){
+                            reject("No such Wilma server available.")
+                        }else {
+                            console.log("Posting")
+                            request.get({
+                                url: server + "/index_json"
+                            }).then(async res1 => {
+                                if(res1[0] != null){
+                                    reject(res1[0])
+                                }else {
+                                    //TODO: Handle API Version
+                                    parser.format(res1[1].body).then(async data => {
+                                        if(data.SessionID != undefined){
+                                            memory.session.sessionId = data.SessionID
+                                            request.post({
+                                                url: server + "/login",
+                                                body: {
+                                                    Login: username,
+                                                    Password: password,
+                                                    SESSIONID: data.SessionID,
+                                                    CompleteJson: null,
+                                                    format: "Json"
+                                                }
+                                            }).then(async res2 => {
+                                                if(res2[0] != null){
+                                                    reject(res2[0])
+                                                }else {
+                                                    if(res2[1].error != undefined){
+                                                        reject(res2[1].error)
+                                                    }else {
+                                                        console.log("No error")
+                                                        //done
+                                                        resolve(res2[1])
+                                                    }   
+                                                }
+                                            }).catch(async err1 => {
+                                                reject(err1)
+                                            })
+                                        }else {
+                                            reject(["SessionID missing from response body.", null])
+                                        }
+                                    }).catch(async err => {
+
+                                    })
+                                }
+                            }).catch(async err => {
+                                reject(err)
+                            })
+                        }
+                    }   
+                })
+            }
+            catch(err){
+
+            }
+        })
     }
     /**
      * Logout from a Wilma server
