@@ -1,19 +1,24 @@
 // -- Modules --
-// (These get replaced with the appropriate module class)
+// All of these are loaded dynamically based on the platform you have because of minor differences in the supported platforms.
+// These modules will function the same regardless of the platform.
 let parser = null
 let request = null
 
 // -- memory --
-let cache = {
-    token: null,
-    sessionId: null,
-    messages: null,
-    servers: []
+let memory = {
+    session: {
+        token: null,
+        sessionId: null,
+    },
+    cache: {
+        messages: [],
+        servers: []
+    }
     //..etc (cache results)
 }
 
 // -- Classes --
-class messages {
+class messages { //Messages class
     async get(id){
 
     }
@@ -24,7 +29,7 @@ class messages {
 
     }
 }
-class message {
+class message { //Class for each message
     constructor(){
 
     }
@@ -41,7 +46,7 @@ class message {
 
     }
 }
-class schedule {
+class schedule { //Schedule class
     async get(date){
 
     }
@@ -52,7 +57,7 @@ class schedule {
 class choices {
     //No idea what needed here
 }
-class exams {
+class exams { //Exams class
     async get(id){
 
     }
@@ -60,7 +65,7 @@ class exams {
 
     }
 }
-class attendence {
+class attendence { //Attendence class
     async get(id){
 
     }
@@ -71,7 +76,7 @@ class attendence {
 class attendenceSingle {
     //Actions per attendence note, no idea what goes here tho
 }
-class printouts {
+class printouts { //Printouts class
     async getAll(){
 
     }
@@ -82,7 +87,7 @@ class feedback {
 class enrollment {
     //No idea what goes here
 }
-class trays {
+class trays { //Trays class
     async getAll(){
 
     }
@@ -93,7 +98,7 @@ class trays {
         
     }
 }
-class news {
+class news { //News class
     async list(){
 
     }
@@ -101,13 +106,13 @@ class news {
 
     }
 }
-class catalog {
+class catalog { //Catalog class
     async get(){
 
     }
 }
-class profile {
-    async self(){
+class profile { //Profile class
+    async self(){ //Get the active userinfo
 
     }
     async get(id){
@@ -117,7 +122,7 @@ class profile {
 
     }
 }
-class strategy {
+class strategy { //Strategy class
     async list(){
 
     }
@@ -125,7 +130,7 @@ class strategy {
 
     }
 }
-class forms {
+class forms { //Forms class
     async list(){
 
     }
@@ -154,33 +159,56 @@ class OpenWilma {
         this.strategy = new strategy()
         this.forms = new forms()
     }
-    async _checkUrl(){
+    /**
+     * Get the list of wilma servers
+     * @returns Promise([error, http(s)_response])
+     */
+    async _getList(){
         return new Promise(async (resolve, reject) => {
             try {
                 request.get({
                     url: "https://www.starsoft.fi/wilmat/wilmat.json",
                 }).then(async result => {
                     if(result.status == 200){
-                        let data = await parser.format(result.body)
-                        cache.servers = data.wilmat
-                        resolve(cache.servers)
+                        parser.format(result.body).then(async data => {
+                            memory.cache.servers = data.wilmat
+                            resolve([null, data.wilmat])  
+                        }).catch(async err => {
+                            reject([err, result])
+                        })
                     }else {
-                        reject([null, result])
+                        reject([false, result])
                     }
                 }).catch(async err => {
-                    reject(err)
+                    reject([err, result])
                 })
             }
             catch(err){
-                reject(err)
+                reject([err, null])
             }
         })
     }
-    async login(){
+    /**
+     * Login to a secondary account that the logged in account has permission to control
+     * @param {*} id 
+     */
+    async setUser(id){
+
+    }
+    /**
+     * Login to a Wilma server
+     * @param {String} server 
+     * @param {String} username The username of the Wilma account
+     * @param {String} password The password of the Wilma account
+     */
+    async login(server, username, password){ //Login to wilma
         
     }
-    async logout(){
-
+    /**
+     * Logout from a Wilma server
+     */
+    async logout(){ //Logout from wilma
+ 
     }
 }
 
@@ -188,15 +216,19 @@ class OpenWilma {
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define([], factory)
+        //TODO: add dependencies for this platform
     } else if (typeof module === 'object' && module.exports) {
+        // Run in Node.JS mode
         parser = require("../bin/parser.js")
         request = require("../bin/requestNode.js")
         module.exports = factory()
     } else {
+        // Run in browser mode, please note that Cross-origin requests must be allowed.
         document.write('<' + 'script src="' + "../bin/parser.js" + '"' + ' type="text/javascript"><' + '/script>');
         document.write('<' + 'script src="' + "../bin/requestBrowser.js" + '"' +' type="text/javascript"><' + '/script>');
         root.returnExports = factory()
     }
 }(typeof self !== 'undefined' ? self : this, function () {
+    //Return the main class as the exported data
     return OpenWilma
 }));

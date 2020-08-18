@@ -4,12 +4,14 @@ class Parser {
 
     }
     async format(data){
-        try {
-            return JSON.parse(data)
-        }
-        catch(err){
-            throw new Error("Invalid data recieved: " + err)
-        }
+        return new Promise(async (resolve, reject) => {
+            try {
+                return JSON.parse(data)
+            }
+            catch(err){
+                throw new Error("Invalid data recieved: " + err)
+            }
+        })
     }
     //..etc
 }
