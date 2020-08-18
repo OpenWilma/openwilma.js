@@ -169,8 +169,8 @@ class OpenWilma {
                 request.get({
                     url: "https://www.starsoft.fi/wilmat/wilmat.json",
                 }).then(async result => {
-                    if(result.status == 200){
-                        parser.format(result.body).then(async data => {
+                    if(result[1].status == 200){
+                        parser.format(result[1].body).then(async data => {
                             memory.cache.servers = data.wilmat
                             resolve([null, data.wilmat])  
                         }).catch(async err => {
@@ -219,13 +219,13 @@ class OpenWilma {
         //TODO: add dependencies for this platform
     } else if (typeof module === 'object' && module.exports) {
         // Run in Node.JS mode
-        parser = require("../bin/parser.js")
-        request = require("../bin/requestNode.js")
+        parser = require("./bin/parser.js")
+        request = require("./bin/requestNode.js")
         module.exports = factory()
     } else {
         // Run in browser mode, please note that Cross-origin requests must be allowed.
-        document.write('<' + 'script src="' + "../bin/parser.js" + '"' + ' type="text/javascript"><' + '/script>');
-        document.write('<' + 'script src="' + "../bin/requestBrowser.js" + '"' +' type="text/javascript"><' + '/script>');
+        document.write('<' + 'script src="' + "./bin/parser.js" + '"' + ' type="text/javascript"><' + '/script>');
+        document.write('<' + 'script src="' + "./bin/requestBrowser.js" + '"' +' type="text/javascript"><' + '/script>');
         root.returnExports = factory()
     }
 }(typeof self !== 'undefined' ? self : this, function () {
