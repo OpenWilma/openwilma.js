@@ -65,7 +65,7 @@ class Request {
      * Perform a POST request. Returns an array on promise resolve. First element is the error (null for success). Second element is the error message on promise rejection and the request result on resolve.
      * @param {{url: "", body: {}, headers: {"HEADERNAME": "VALUE","HEADERNAME": "VALUE"}}} options The options object
      */
-    async post(){
+    async post(options){
         return new Promise(async (resolve, reject) => {
             try {
                 if(typeof options == "object" && options.url != undefined){
