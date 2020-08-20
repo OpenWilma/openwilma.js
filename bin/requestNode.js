@@ -55,7 +55,7 @@ class Request {
                                                 reject(["Too many redirects", collection])
                                             }else {
                                                 ++redirects
-                                                request(loc, options.headers["Content-Type"] == "application/x-www-form-urlencoded" ? "GET" : "POST")
+                                                request(loc, "GET")
                                             }
                                         }
                                         catch(err){
