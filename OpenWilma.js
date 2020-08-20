@@ -217,14 +217,12 @@ class OpenWilma {
                                 memory.session.server = server
                                 memory.session.serverName = res[1][i].name
                                 found = true
-                                console.log("Match!")
                                 break
                             }
                         }
                         if(found == false){
                             reject("No such Wilma server available.")
                         }else {
-                            console.log("Posting")
                             request.get({
                                 url: server + "/index_json"
                             }).then(async res1 => {
@@ -243,16 +241,17 @@ class OpenWilma {
                                                     SESSIONID: data.SessionID,
                                                     CompleteJson: null,
                                                     format: "Json"
+                                                },
+                                                headers: {
+                                                    "Content-Type": "application/x-www-form-urlencoded"
                                                 }
                                             }).then(async res2 => {
                                                 if(res2[0] != null){
                                                     reject(res2[0])
                                                 }else {
                                                     if(res2[1].error != undefined){
-                                                        reject(res2[1].error)
+                                                        reject(res2[1])
                                                     }else {
-                                                        console.log("No error")
-                                                        //done
                                                         resolve(res2[1])
                                                     }   
                                                 }

@@ -2,8 +2,8 @@
 class Request {
     /**
      * Perform a GET request. Returns an array on promise resolve. First element is the error (null for success). Second element is the error message on promise rejection and the request result on resolve.
-     * @param {{url: "", body: "", headers: [{name: "HEADERNAME", value: "VALUE"}, {name: "HEADERNAME", value: "VALUE"}]}} options The options object
-     * @returns Promise([error, errorMessage/responseData])
+     * @param {{url: "", body: {}, headers: {"HEADERNAME": "VALUE","HEADERNAME": "VALUE"}}} options The options object
+     * @returns Promise -> resolve(null, data), reject(error, errorMessage)
      */
     async get(options){
         return new Promise(async (resolve, reject) => {
@@ -35,9 +35,10 @@ class Request {
                                 }
                                 if(options.headers.length != 0){
                                     let index = 0
-                                    options.headers.forEach(async header => {
+                                    Object.keys(options.headers).forEach(async header => {
+                                        let value = options.headers[header]
                                         try {
-                                            req.setRequestHeader(header.name, header.value)
+                                            req.setRequestHeader(header, value)
                                             ++index
                                             if(index == options.headers.length){
                                                 //Code continues here
@@ -92,8 +93,8 @@ class Request {
     }
     /**
      * Perform a POST request. Returns an array on promise resolve. First element is the error (null for success). Second element is the error message on promise rejection and the request result on resolve.
-     * @param {{url: "", body: "", headers: [{name: "HEADERNAME", value: "VALUE"}, {name: "HEADERNAME", value: "VALUE"}]}} options The options object
-     * @returns Promise([error, errorMessage/responseData])
+     * @param {{url: "", body: {}, headers: {"HEADERNAME": "VALUE","HEADERNAME": "VALUE"}}} options The options object
+     * @returns Promise -> resolve(null, data), reject(error, errorMessage)
      */
     async post(options){
         return new Promise(async (resolve, reject) => {
@@ -116,9 +117,10 @@ class Request {
                             }
                             if(options.headers.length != 0){
                                 let index = 0
-                                options.headers.forEach(async header => {
+                                Object.keys(options.headers).forEach(async header => {
+                                    let value = options.headers[header]
                                     try {
-                                        req.setRequestHeader(header.name, header.value)
+                                        req.setRequestHeader(header, value)
                                         ++index
                                         if(index == options.headers.length){
                                             //Code continues here
