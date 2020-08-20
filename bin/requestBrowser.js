@@ -46,7 +46,8 @@ class Request {
                                         }
                                     }
                                 }
-                                let ar = Object.keys(options.headers)
+                                let ar = []
+                                if(options.headers != undefined) ar = Object.keys(options.headers)
                                 if(ar.length == 0){
                                     req.open(methodOptional != undefined ? methodOptional : "POST", url, true)
                                     if(options.body != undefined){
