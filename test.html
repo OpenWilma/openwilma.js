@@ -1,10 +1,15 @@
-<script src="http://esinko.net/downloads/openwilma/OpenWilma.js"></script>
+<script src="PATH TO SCRIPT"></script>
 <script>
     let session = new OpenWilma()
     
-    session._checkUrl().then(async res => {
+    session._getList().then(async res => {
         console.log("Compatible runtime!")
+        session.login("url", "username", "password").then(async res => {
+            console.log(res.cookies)
+        }).catch(async err => {
+            console.log(err)
+        })
     }).catch(async err => {
-        console.log("Unsupported runtime: ", err)
+        console.log(err, "\nUnsupported runtime.")
     })
 </script>
