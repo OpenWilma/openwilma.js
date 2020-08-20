@@ -16,6 +16,9 @@ class Request {
                         }else {
                             async function request(url, methodOptional){
                                 let req = new XMLHttpRequest()
+                                req.onerror = function(err){
+                                    reject([err, "Something went wrong while performing the request"])
+                                }
                                 req.onreadystatechange = function() {
                                     if(this.readyState == 4) {
                                         this.status = this.status.toString()
@@ -150,6 +153,9 @@ class Request {
                         }else {
                             async function request(url, methodOptional){
                                 let req = new XMLHttpRequest()
+                                req.onerror = function(err){
+                                    reject([err, "Something went wrong while performing the request"])
+                                }
                                 req.onreadystatechange = function() {
                                     if(this.readyState == 4) {
                                         this.status = this.status.toString()
