@@ -1,7 +1,7 @@
 # OpenWilma_js
 
 A Node.JS and browser library to interract with the Wilma API. <br>Use this simple and secure library to create your own Wilma enabled applications!
-#### (Library still in development, do not use in producation)
+#### (Library still in development, do not use in production)
 
 # Installation
 1. Clone this Github repository
