@@ -154,7 +154,7 @@ class schedule { //Schedule class
                     }
                 }).then(async res => {
                     parser.schedule(res[1].body).then(async json => {
-                        console.log(json)
+                        resolve(json)
                     }).catch(async err => {
                         reject(err)
                     }) 
