@@ -338,9 +338,11 @@ const htmlEntities = {
     "♥": "&hearts",
     "♦": "&diams"
 }
+const weekdays = ["maantai", "tiistai", "keskiviikko", "torstai", "perjantai"]
 
 //Data parser
 class Parser {
+    //Formatting functions. Internal
     toUTF8(data){
         let symb = Object.keys(htmlEntities)
         for(let i = 0; symb.length > i; i++){
@@ -369,6 +371,21 @@ class Parser {
             return null
         }
     }
+    toRoom(data){
+        return {
+            id: data.kortti,
+            shortName: data.lyhenne,
+            name: data.nimi
+        }
+    }
+    toTeacher(data){
+        return {
+            id: data.kortti,
+            callsign: data.lyhenne,
+            name: data.nimi
+        }
+    }
+    //Normal functions
 
     async messages(data){
         return new Promise(async (resolve, reject) => {
@@ -415,6 +432,53 @@ class Parser {
                         reply: data.AllowReply
                     },
                     content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, ""))
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async schedule(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let tmp = data
+                data = '{"data": [' + data.split("[")[1].split("]")[0] + "]}"
+                data = JSON.parse(data).data
+                let schedule = []
+                for(let i = 0; data.length > i; i++){
+                    let entry = data[i]
+                    schedule.push({
+                        id: entry.Id,
+                        weekday: weekdays.indexOf(entry.ViikonPaiva.toLowerCase()),
+                        date: entry.Date,
+                        start: entry.Start,
+                        end: entry.End,
+                        name: entry.Text["0"],
+                        fullName: entry.LongText["0"],
+                        duringBreak: entry.MinuuttiSij != "0",
+                        position: {
+                            x: entry.X1 != 0 ? entry.X1 * 0.001 : 0,
+                            y: entry.Y1 //how tf does this function
+                        },
+                        students: parseInt(entry.OppCount["0"].split(" ")[0]),
+                        book: null, //TODO: Is this data available?
+                        rooms: this.toRoom(entry.HuoneInfo["0"]["0"]),
+                        teachers: this.toTeacher(entry.OpeInfo["0"]["0"])
+                    })
+                }
+                let periods = tmp.split('<ul class="dropdown-menu">')[1].split('</ul>')[0]
+                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/<\/a>/g, "").split("\">")
+                let _periods = []
+                for(let e = 0; periods.length > e; e++){
+                    let name = periods[e]
+                    name = name.split("<")
+                    if(name[0] != "") _periods.push(name[0])
+                }
+                periods = _periods
+                resolve({
+                    data: schedule,
+                    periods: periods
                 })
             }
             catch(err){

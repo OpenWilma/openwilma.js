@@ -118,10 +118,54 @@ class messages { //Messages class
 }
 class schedule { //Schedule class
     async get(date){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(/([0-9]{1,})\.([0-9]{1,})\.([0-9]{1,})/g.test(date)){
+                    request.get({
+                        url: memory.session.server + "/schedule?date=" + date,
+                        headers: {
+                            "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                        }
+                    }).then(async res => {
+                        parser.schedule(res[1].body).then(async json => {
+                            resolve(json)
+                        }).catch(async err => {
+                            reject(err)
+                        }) 
+                    }).catch(async err => {
+                        reject(err)
+                    })  
+                }else {
+                    reject("Invalid date format")
+                }
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
     }
     async getCurrent(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/schedule",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.schedule(res[1].body).then(async json => {
+                        resolve(json)
+                    }).catch(async err => {
+                        reject(err)
+                    }) 
+                }).catch(async err => {
+                    reject(err)
+                })  
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
     }
 }
 class choices {
