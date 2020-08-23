@@ -373,14 +373,14 @@ class Parser {
     }
     toRoom(data){
         return {
-            id: data.tunniste,
+            id: data.kortti,
             shortName: data.lyhenne,
             name: data.nimi
         }
     }
     toTeacher(data){
         return {
-            id: data.tunniste,
+            id: data.kortti,
             callsign: data.lyhenne,
             name: data.nimi
         }
@@ -442,6 +442,7 @@ class Parser {
     async schedule(data){
         return new Promise(async (resolve, reject) => {
             try {
+                let tmp = data
                 data = '{"data": [' + data.split("[")[1].split("]")[0] + "]}"
                 data = JSON.parse(data).data
                 let schedule = []
@@ -466,7 +467,19 @@ class Parser {
                         teachers: this.toTeacher(entry.OpeInfo["0"]["0"])
                     })
                 }
-                resolve(schedule)
+                let periods = tmp.split('<ul class="dropdown-menu">')[1].split('</ul>')[0]
+                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/<\/a>/g, "").split("\">")
+                let _periods = []
+                for(let e = 0; periods.length > e; e++){
+                    let name = periods[e]
+                    name = name.split("<")
+                    if(name[0] != "") _periods.push(name[0])
+                }
+                periods = _periods
+                resolve({
+                    data: schedule,
+                    periods: periods
+                })
             }
             catch(err){
                 reject(err)
