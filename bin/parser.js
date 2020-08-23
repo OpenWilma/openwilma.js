@@ -351,6 +351,25 @@ class Parser {
         }
         return data
     }
+    toCallsign(data){
+        if(data.includes(", ")){
+            return [0, data.split(", ")[1]]
+        }else if(data.includes(" (") && data.includes(")")){
+            return [1, data.split(" (")[1].replace(")", "")]
+        }else {
+            return null
+        }
+    }
+    toName(data){
+        if(data.includes(", ")){
+            return data.split(", ")[0]
+        }else if(data.includes(" (") && data.includes(")")){
+            return data.split(" (")[0]
+        }else {
+            return null
+        }
+    }
+
     async messages(data){
         return new Promise(async (resolve, reject) => {
             try {
@@ -363,8 +382,9 @@ class Parser {
                         author: {
                             id: data[i].SenderId,
                             role: role[data[i].SenderType],
-                            name: data[i].Sender.split(" (")[0],
-                            callsign: data[i].Sender.split("(")[1].replace(")", "")
+                            name: this.toName(data[i].Sender),
+                            callsign: this.toCallsign(data[i].Sender)[0] == 1 ? this.toCallsign(data[i].Sender)[1] : null,
+                            class: this.toCallsign(data[i].Sender)[0] == 2 ? this.toCallsign(data[i].Sender)[1] : null
                         },
                         id: data[i].Id
                     })
@@ -387,7 +407,8 @@ class Parser {
                         id: data.SenderId,
                         role: role[data.SenderType],
                         name: data.Sender.split(" (")[0],
-                        callsign: data.Sender.split("(")[1].replace(")", "")
+                        callsign: this.toCallsign(data.Sender)[0] == 1 ? this.toCallsign(data.Sender)[1] : null,
+                        class: this.toCallsign(data.Sender)[0] == 2 ? this.toCallsign(data.Sender)[1] : null
                     },
                     permissions: {
                         forward: data.AllowForward,
