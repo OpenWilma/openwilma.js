@@ -338,7 +338,7 @@ const htmlEntities = {
     "♥": "&hearts",
     "♦": "&diams"
 }
-const weekdays = ["maantai", "tiistai", "keskiviikko", "torstai", "perjantai"]
+const weekdays = ["maanantai", "tiistai", "keskiviikko", "torstai", "perjantai"]
 
 //Data parser
 class Parser {
