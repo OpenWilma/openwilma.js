@@ -181,6 +181,17 @@ class catalog { //Catalog class
 
     }
 }
+class classes { //Classes class
+    async selfClass(){ 
+
+    }
+    async getAllClasses(){
+
+    }
+    async getClass(){
+
+    }
+}
 class profile { //Profile class
     async self(){ //Get the active userinfo
 
