@@ -227,13 +227,100 @@ class catalog { //Catalog class
 }
 class classes { //Classes class
     async selfClass(){ 
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/profiles/students",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    resolve(parseInt(parser.selfClass(res[1].body)));
+                }).catch(async err => {
+                    reject(err)
+                })  
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
     }
-    async getAllClasses(){
-
+    async getSchools(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/api/v1/schools",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.format(res[1].body).then(async json => {
+                        resolve(json.payload)
+                    }).catch(async err => {
+                        reject(err)
+                    }) 
+                }).catch(async err => {
+                    reject(err)
+                })  
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
     }
-    async getClass(){
-
+    async getClasses(schoolId){
+        return new Promise(async (resolve, reject) => {
+            if (typeof schoolId == "number") {
+                try {
+                    request.get({
+                        url: memory.session.server + "/api/v1/schools/" + schoolId + "/classes",
+                        headers: {
+                            "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                        }
+                    }).then(async res => {
+                        parser.format(res[1].body).then(async json => {
+                            resolve(json.payload)
+                        }).catch(async err => {
+                            reject(err)
+                        }) 
+                    }).catch(async err => {
+                        reject(err)
+                    })  
+                }
+                catch(err){
+                    reject(err)
+                }   
+            } else {
+              reject('Parameter schoolId must be passed to the function');  
+            }
+        })
+    }
+    async getClassStudents(classId){
+        return new Promise(async (resolve, reject) => {
+            if (typeof classId == "number") {
+                try {
+                    request.get({
+                        url: memory.session.server + "/profiles/classes/" + classId,
+                        headers: {
+                            "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                        }
+                    }).then(async res => {
+                        parser.classStudents(res[1].body).then(async students => {
+                            resolve(students)
+                        }).catch(async err => {
+                            reject(err)
+                        }) 
+                    }).catch(async err => {
+                        reject(err)
+                    })  
+                }
+                catch(err){
+                    reject(err)
+                }   
+            } else {
+              reject('Parameter classId must be passed to the function');  
+            }
+        })
     }
 }
 class profile { //Profile class
@@ -283,6 +370,7 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
+        this.classes = new classes()
         //TODO: Events?
     }
     /**

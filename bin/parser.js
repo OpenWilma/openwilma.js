@@ -486,6 +486,28 @@ class Parser {
             }
         })
     }
+    classStudents(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let results = [];
+                data.match(/<tr(.*?)<\/tr>/gms).forEach((result) => {
+                    let name = result.split('<td>')[1].split('</td>')[0].trim();
+                    results.push(name);
+                });
+                resolve(results);
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    selfClass(data) {
+         try {
+            return data.split('<a href="/profiles/students/classes/')[1].split('" class="')[0];
+         } catch (e) {
+             return undefined;
+         }
+    }
     async format(data){
         return new Promise(async (resolve, reject) => {
             try {
