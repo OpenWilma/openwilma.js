@@ -4,39 +4,36 @@
 let parser = null
 let request = null
 
-// -- memory --
+// -- Config --
+const config = {
+    supportedApiVersions: ["11"]
+}
+const messageDirs = ["archive", "drafts", "sent"]
+// -- Memory --
 let memory = {
     session: {
         token: null,
         sessionId: null,
         server: null,
-        serverName: ""
+        serverName: "",
+        lastRequest: null
     },
-    cache: {
-        messages: [],
+    cache: { //TODO: Implement caching with 30s intervals
+        messages: {
+            inbox: null,
+            drafts: null,
+            sent: null,
+            archive: null
+        },
         servers: []
     }
     //..etc (cache results)
 }
 
 // -- Classes --
-class messages { //Messages class
-    async get(id){
-
-    }
-    async getAll(category){
-
-    }
-    async send(){
-
-    }
-}
 class message { //Class for each message
-    constructor(){
-
-    }
     async markAsRead(){
-
+        
     }
     async archive(){
 
@@ -46,6 +43,77 @@ class message { //Class for each message
     }
     async delete(){
 
+    }
+}
+class messages { //Messages class
+    async get(id){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/messages/" + id + "?format=json",
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token
+                    }
+                }).then(async res => {
+                    parser.format(res[1].body).then(async json => {
+                        parser.message(json.messages[0]).then(async msg => {
+                            let _class = new message()
+                            let ar = Object.keys(msg)
+                            for(let i = 0; ar.length > i; i++){
+                                _class[ar[i]] = msg[ar[i]]
+                            }
+                            resolve(_class)
+                        }).catch(async err => {
+                            reject(err)
+                        })
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async getAll(category){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(category == "inbox" || category == undefined){
+                    request.get({
+                        url: memory.session.server + "/messages/list",
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token
+                        }
+                    }).then(async res => {
+                        parser.format(res[1].body).then(async json => {
+                            parser.messages(json.Messages).then(async msgs => {
+                                memory.cache.messages.inbox = msgs
+                                resolve(msgs)
+                            })
+                        }).catch(async err => {
+                            reject(err)
+                        })
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    if(messageDirs.includes(category)){
+                        
+                    }else {
+                        reject("Unkown category. Supported: " + messageDirs.join(", "))
+                    }
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async send(){
+        //TODO: How the f Do I do this again :p
     }
 }
 class schedule { //Schedule class
@@ -160,6 +228,7 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
+        //TODO: Events?
     }
     /**
      * Get the list of wilma servers
@@ -174,6 +243,7 @@ class OpenWilma {
                     if(result[1].status == 200){
                         parser.format(result[1].body).then(async data => {
                             memory.cache.servers = data.wilmat
+                            memory.session.lastRequest = new Date().getTime()
                             resolve([null, data.wilmat])  
                         }).catch(async err => {
                             reject([err, result])
@@ -189,6 +259,24 @@ class OpenWilma {
                 reject([err, null])
             }
         })
+    }
+    /**
+     * Refresh the session if it's not being upkept with normal requests
+     */
+    async _refreshSession(){
+        if(this.refreshLoop != null) this.refreshLoop = null
+        this.refreshLoop = setInterval(async () => {
+            if((memory.session.lastRequest + 25) >= new Date().getTime()){
+                request.get({
+                    url: memory.session.server + "/overview", //Is this valid?
+                    args: ["NoRedirects"]
+                }).then(async res => {
+                    memory.session.lastRequest = new Date().getTime()
+                }).catch(async err => {
+                    throw new Error(err)
+                })
+            }
+        }, 500)
     }
     /**
      * Login to a secondary account that the logged in account has permission to control
@@ -229,40 +317,47 @@ class OpenWilma {
                                 if(res1[0] != null){
                                     reject(res1[0])
                                 }else {
-                                    //TODO: Handle API Version
                                     parser.format(res1[1].body).then(async data => {
-                                        if(data.SessionID != undefined){
-                                            memory.session.sessionId = data.SessionID
-                                            request.post({
-                                                url: server + "/login",
-                                                body: {
-                                                    Login: username,
-                                                    Password: password,
-                                                    SESSIONID: data.SessionID,
-                                                    CompleteJson: null,
-                                                    format: "Json"
-                                                },
-                                                headers: {
-                                                    "Content-Type": "application/x-www-form-urlencoded"
-                                                }
-                                            }).then(async res2 => {
-                                                if(res2[0] != null){
-                                                    reject(res2[0])
-                                                }else {
-                                                    if(res2[1].error != undefined){
-                                                        reject(res2[1])
+                                        if(config.supportedApiVersions.includes(data.ApiVersion.toString())){
+                                            if(data.SessionID != undefined){
+                                                memory.session.sessionId = data.SessionID
+                                                request.post({
+                                                    url: server + "/login",
+                                                    body: {
+                                                        Login: username,
+                                                        Password: password,
+                                                        SESSIONID: data.SessionID,
+                                                        CompleteJson: null,
+                                                        format: "Json"
+                                                    },
+                                                    headers: {
+                                                        "Content-Type": "application/x-www-form-urlencoded"
+                                                    },
+                                                    args: ["NoRedirects"]
+                                                }).then(async res2 => {
+                                                    if(res2[0] != null){
+                                                        reject(res2[0])
                                                     }else {
-                                                        resolve(res2[1])
-                                                    }   
-                                                }
-                                            }).catch(async err1 => {
-                                                reject(err1)
-                                            })
+                                                        if(res2[1].error != undefined){
+                                                            reject(res2[1])
+                                                        }else {
+                                                            memory.session.lastRequest = new Date().getTime()
+                                                            this._refreshSession()
+                                                            memory.session.token = res2[1].cookies.Wilma2SID.value
+                                                            resolve()
+                                                        }   
+                                                    }
+                                                }).catch(async err1 => {
+                                                    reject(err1)
+                                                })
+                                            }else {
+                                                reject("SessionID missing from response body.")
+                                            }
                                         }else {
-                                            reject(["SessionID missing from response body.", null])
+                                            reject("Unsupported ApiVersion: " + data.ApiVersion + ", supported: " + config.supportedApiVersions.join(", "))
                                         }
                                     }).catch(async err => {
-
+                                        reject("Unexpected parser error: " + err)
                                     })
                                 }
                             }).catch(async err => {
@@ -273,15 +368,38 @@ class OpenWilma {
                 })
             }
             catch(err){
-
+                reject(err)
             }
         })
     }
     /**
      * Logout from a Wilma server
      */
-    async logout(){ //Logout from wilma
- 
+    async logout(){ //Logout from wilma. TODO: Does this work...?
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.post({
+                    url: memory.session.server + "/logout",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";",
+                        CompleteJson: null,
+                        format: "Json",
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: {
+                        FormKey: memory.session.sessionId
+                    },
+                    args: ["NoRedirects"]
+                }).then(async res => {
+                    resolve()
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
     }
 }
 
