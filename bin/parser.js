@@ -385,6 +385,15 @@ class Parser {
             name: data.nimi
         }
     }
+    convertToScheduleTable(data){ //TODO: Does this even help at all?
+        let table = {}
+        for(let i = 0; data.length > i; i++){
+            let day = data[i]
+            if(table[day.position.x] == undefined) table[day.position.x] = {}
+            table[day.position.x][day.position.y] = day
+        }
+        return table
+    }
     //Normal functions
 
     async messages(data){
@@ -450,7 +459,6 @@ class Parser {
                     let entry = data[i]
                     schedule.push({
                         id: entry.Id,
-                        weekday: weekdays.indexOf(entry.ViikonPaiva.toLowerCase()),
                         date: entry.Date,
                         start: entry.Start,
                         end: entry.End,
@@ -458,17 +466,21 @@ class Parser {
                         fullName: entry.LongText["0"],
                         duringBreak: entry.MinuuttiSij != "0",
                         position: {
-                            x: entry.X1 != 0 ? entry.X1 * 0.001 : 0,
-                            y: entry.Y1 //how tf does this function
+                            x: entry.X1 != 0 ? entry.X1 * 0.0001 : 0,
+                            y: entry.Y1 != 0 ? entry.Y1 + 1 : entry.Y1
                         },
                         students: parseInt(entry.OppCount["0"].split(" ")[0]),
                         book: null, //TODO: Is this data available?
                         rooms: this.toRoom(entry.HuoneInfo["0"]["0"]),
-                        teachers: this.toTeacher(entry.OpeInfo["0"]["0"])
+                        teachers: this.toTeacher(entry.OpeInfo["0"]["0"]),
+                        editor: {
+                            added: entry.Lisaaja.Nimi,
+                            edited: entry.Muokkaaja.Nimi
+                        }
                     })
                 }
                 let periods = tmp.split('<ul class="dropdown-menu">')[1].split('</ul>')[0]
-                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/<\/a>/g, "").split("\">")
+                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/                /g, "").replace(/<\/a>/g, "").split("\">")
                 let _periods = []
                 for(let e = 0; periods.length > e; e++){
                     let name = periods[e]
@@ -477,7 +489,7 @@ class Parser {
                 }
                 periods = _periods
                 resolve({
-                    data: schedule,
+                    data: this.convertToScheduleTable(schedule),
                     periods: periods
                 })
             }
