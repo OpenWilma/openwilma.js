@@ -225,27 +225,8 @@ class catalog { //Catalog class
 
     }
 }
-class classes { //Classes class
-    async selfClass(){ 
-        return new Promise(async (resolve, reject) => {
-            try {
-                request.get({
-                    url: memory.session.server + "/profiles/students",
-                    headers: {
-                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
-                    }
-                }).then(async res => {
-                    resolve(parseInt(parser.selfClass(res[1].body)));
-                }).catch(async err => {
-                    reject(err)
-                })  
-            }
-            catch(err){
-                reject(err)
-            }   
-        })
-    }
-    async getSchools(){
+class schools {
+    async getAll(){
         return new Promise(async (resolve, reject) => {
             try {
                 request.get({
@@ -259,6 +240,27 @@ class classes { //Classes class
                     }).catch(async err => {
                         reject(err)
                     }) 
+                }).catch(async err => {
+                    reject(err)
+                })  
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
+    }
+}
+class classes { //Classes class
+    async selfClass(){ 
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/profiles/students",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    resolve(parseInt(parser.selfClass(res[1].body)));
                 }).catch(async err => {
                     reject(err)
                 })  
@@ -371,6 +373,7 @@ class OpenWilma {
         this.strategy = new strategy()
         this.forms = new forms()
         this.classes = new classes()
+        this.schools = new schools()
         //TODO: Events?
     }
     /**
