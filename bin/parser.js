@@ -486,6 +486,70 @@ class Parser {
             }
         })
     }
+    async schools(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let schools = []
+                data = data.payload
+                for(let i = 0; data.length> i; i++){
+                    schools.push({
+                        id: data[i].id,
+                        name: data[i].caption,
+                        additionalFeatures: data[i].features
+                    })
+                }
+                resolve(schools)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async classes(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let schools = []
+                data = data.payload
+                for(let i = 0; data.length> i; i++){
+                    schools.push({
+                        id: data[i].id,
+                        name: data[i].caption,
+                        messagePermissions: data[i].features.sendMessages,
+                        classTeachers: data[i].supervisors
+                    })
+                }
+                resolve(schools)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async classStudents(data) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                let results = [];
+                let query = data.match(/<tr(.*?)<\/tr>/gms);
+                if (query) {
+                    query.forEach((result) => {
+                        let name = result.split('<td>')[1].split('</td>')[0].trim();
+                        results.push(name);
+                    });
+                }
+                resolve(results);
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    //selfClass(data) {
+    //     try {
+    //        return data.split('<a href="/profiles/students/classes/')[1].split('" class="')[0];
+    //     } catch (e) {
+    //         return undefined;
+    //     }
+    //}
     async format(data){
         return new Promise(async (resolve, reject) => {
             try {
