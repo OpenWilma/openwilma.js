@@ -480,12 +480,12 @@ class Parser {
                     })
                 }
                 let periods = tmp.split('<ul class="dropdown-menu">')[1].split('</ul>')[0]
-                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/<\/a>/g, "").split("\">")
+                periods = periods.replace(/ {1,}</g, "<").replace(/<li role=".{1,}">/g, "").replace(/<\/li>/g, "").replace(/\n|\r/g, "").replace(/                    /g, "").replace(/                /g, "").replace(/<\/a>/g, "").split("\">")
                 let _periods = []
                 for(let e = 0; periods.length > e; e++){
                     let name = periods[e]
                     name = name.split("<")
-                    if(name[0] != "") _periods.push(name[0].replace("                ", ""))
+                    if(name[0] != "") _periods.push(name[0])
                 }
                 periods = _periods
                 resolve({
