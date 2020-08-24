@@ -359,7 +359,6 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
-        this.classes = new classes()
         this.schools = new schools()
         //TODO: Events?
     }
