@@ -225,9 +225,96 @@ class catalog { //Catalog class
 
     }
 }
+class schools {
+    async getAll(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/api/v1/schools",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.format(res[1].body).then(async json => {
+                        parser.schools(json).then(async schoolsArray => {
+                            resolve(schoolsArray)
+                        }).catch(async err => {
+                            reject(err)
+                        }) 
+                    }).catch(async err => {
+                        reject(err)
+                    }) 
+                }).catch(async err => {
+                    reject(err)
+                })  
+            }
+            catch(err){
+                reject(err)
+            }   
+        })
+    }
+    async get(id){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(typeof id == "number"){
+                    request.get({
+                        url: memory.session.server + "/api/v1/schools/" + id + "/classes",
+                        headers: {
+                            "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                        }
+                    }).then(async res => {
+                        parser.format(res[1].body).then(async json => {
+                            parser.classes(json).then(async res => {
+                                if(res.length == 0){
+                                    resolve([])
+                                }else {
+                                    let construct = []
+                                    for(let i = 0; res.length > i; i++){
+                                        try {
+                                            await request.get({
+                                                url: memory.session.server + "/profiles/classes/" + res[i].id,
+                                                headers: {
+                                                    "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                                                }
+                                            }).then(async res2 => {
+                                                await parser.classStudents(res2[1].body).then(async students => {
+                                                    res[i].students = students
+                                                    construct.push(res[i])
+                                                }).catch(async err => {
+                                                    reject(err)
+                                                }) 
+                                            }).catch(async err => {
+                                                reject(err)
+                                            })  
+                                        }
+                                        catch(err){
+                                            reject(err)
+                                        }   
+                                    }   
+                                    resolve(construct)
+                                }
+                            }).catch(async err => {
+                                reject(err)
+                            }) 
+                        }).catch(async err => {
+                            reject(err)
+                        }) 
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Id must be a number")
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+}
 class profile { //Profile class
     async self(){ //Get the active userinfo
-
+        //Self group id goes here
     }
     async get(id){
 
@@ -272,6 +359,8 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
+        this.classes = new classes()
+        this.schools = new schools()
         //TODO: Events?
     }
     /**
