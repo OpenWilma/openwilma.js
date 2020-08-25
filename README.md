@@ -36,7 +36,7 @@ For browsers, do (make sure to correct the path, if needed):
 Next, check `test.js` or `test.html` for the latest working examples.
 
 # Development 
-To see what is being worked on, take a look in the pull requests and branches of this repo. Feel free to join our [Discord server](https://discord.gg/husTxHa).
+To see what is being worked on, take a look in the pull requests and branches of this repo. Please feel free to join our [Discord server](https://discord.gg/husTxHa).
 <br>
  ##### The Esinko branch: [Esinko-Branch](https://github.com/OpenWilma/openwilma_js/tree/Esinko)
 # License
