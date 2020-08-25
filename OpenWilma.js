@@ -464,6 +464,11 @@ class OpenWilma {
                         if(found == false && (validateServer != false || validateServer == undefined)){
                             reject("No such Wilma server available.")
                         }else {
+                            if (validateServer == false && memory.session.server == null) {
+                                // bypassing server validation
+                                memory.session.server = server;
+                                memory.session.serverName = 'Unknown Server';
+                            }
                             request.get({
                                 url: server + "/index_json"
                             }).then(async res1 => {
