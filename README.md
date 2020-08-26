@@ -54,7 +54,7 @@ For browsers (use script tags!), do:
 
 ## Step 3
 Login to your Wilma account.
-For Node.js, do:
+<br>For Node.js, do:
 ```js
 api.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password").then(async result => {
     //You are logged in!
