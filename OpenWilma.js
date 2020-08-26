@@ -236,8 +236,28 @@ class news { //News class
             }
         })
     }
-    async getId(){
-        //TODO: Add this (gets content jne)
+    async get(id){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/news/" + id,
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.newsEntry(res[1].body).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
 }
 class catalog { //Catalog class

@@ -408,6 +408,9 @@ class Parser {
         }
         return n.join("\n")
     }
+    escape(string){
+        return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
+    }
     //Normal functions
 
     async messages(data){
@@ -569,11 +572,71 @@ class Parser {
             }
         })
     }
+    async newsEntry(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                data = data.split('<!-- Sivukohtainen alue alkaa -->')[1].split('<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 right">')[0]
+                console.log(data)
+                let title = data.split("<h2>")[1].split("</h2>")[0].trim()
+                let content = this.escape(this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", "")))).trim()
+                let authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
+                let authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+                let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
+                let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
+                console.log(released, removedAt)
+                resolve({
+                    title: title,
+                    content: content,
+                    author: {
+                        callsign: authorShort,
+                        name: authorName
+                    },
+                    released: released,
+                    toBeRemoved: removedAt
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
     async news(data){
         return new Promise(async (resolve, reject) => {
             try {
-                let perm = JSON.parse("{ \"data\": [" + (this.removeEmptyLines(this.toReverse(this.toReverse(data.split('<h2>Pysyvät tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0].replace(/ {1,}<div class="margin-bottom-inline"><a class="link-with-arrow" href="\/news\//g, "{ \"id\": \"").replace(/">/g, '", \"title\": "').replace(/<\/a><\/div>/g, '"},')).replace(",", "")))).toString() + "\n]}").data
-                let old = JSON.parse("{ \"data\": [" + (this.removeEmptyLines(this.toReverse(this.toReverse(data.split('<h2>Vanhat tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0].replace(/ {1,}<div class="margin-bottom-inline"><a class="link-with-arrow" href="\/news\//g, "{ \"id\": \"").replace(/">/g, '", \"title\": "').replace(/<\/a><\/div>/g, '"},')).replace(",", "")))).toString() + "\n]}").data
+                let perm = []
+                let _perm = this.removeEmptyLines(data.split('<h2>Pysyvät tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0]).split("\n")
+                for(let i = 0; _perm.length > i; i++){
+                    try {
+                        let entry = _perm[i]
+                        let id = entry.split('href="/news/')[1] != undefined ? entry.split('href="/news/')[1].split('"')[0] : null
+                        if(id == null) continue //Creates an issue in parsing if not there
+                        let title = entry.split('href="/news/' + id + '">')[1] != undefined ? entry.split('href="/news/' + id + '">')[1].split("</a>")[0] : null
+                        perm.push({
+                            id: id,
+                            title: title.replace(/(^(\r\n)|(\r\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
+                        })
+                    }
+                    catch(err){
+                        console.log("Parsing error: ", err)
+                    }
+                }
+                let old = []
+                let _old = this.removeEmptyLines(data.split('<h2>Vanhat tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0]).split("\n")
+                for(let i = 0; _old.length > i; i++){
+                    try {
+                        let entry = _old[i]
+                        let id = entry.split('href="/news/')[1] != undefined ? entry.split('href="/news/')[1].split('"')[0] : null
+                        if(id == null) continue //Creates an issue in parsing if not there
+                        let title = entry.split('href="/news/' + id + '">')[1] != undefined ? entry.split('href="/news/' + id + '">')[1].split("</a>")[0] : null
+                        old.push({
+                            id: id,
+                            title: title.replace(/(^(\\r\\n)|(\\r\\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
+                        })
+                    }
+                    catch(err){
+                        console.log("Parsing error: ", err)
+                    }
+                }   
                 let current = data.split('<div class="panel-body">')[3].replace(/( {1,}<)()()/g, "<").replace(/<div class="panel hidden-md-up">/g, "").split("</div>")
                 let _current = []
                 for(let i = 0; current.length > i; i++){
@@ -593,11 +656,13 @@ class Parser {
                         id: id,
                         author: {
                             name: authorName,
-                            callsign: authorShort
+                            callsign: authorShort,
+                            id: authorId
                         },
                         description: description,
                         date: date,
-                        type: type
+                        type: type,
+                        title: title.replace(/(^(\r\n)|(\r\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
                     })
                 }
                 current = _current
