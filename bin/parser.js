@@ -424,6 +424,7 @@ class Parser {
         html = html.replace(/<[^>]+>/ig, '');
         return html;
     }
+
     //Normal functions
 
     async messages(data){
@@ -592,8 +593,19 @@ class Parser {
                 let title = data.split("<h2>")[1].split("</h2>")[0].trim()
                 let html = this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", ""))).trim()
                 let content = this.convertHtmlToText(this.toUTF8(html));
-                let authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
-                let authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+              
+                let authorData = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
+                let authorName = null
+                let authorShort = null
+                let authorId = null
+                if(authorData.includes("/teachers/")){ //Has link
+                    authorId = authorData.split("/teachers/")[1].split('"')[0]
+                    authorName = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]
+                    authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
+                }else {
+                    authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
+                    authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+                }
                 let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
                 let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
                 // Attention to the end user to avoid XSS vulnerabilities: do not print html value as is straight to the user from JSON
