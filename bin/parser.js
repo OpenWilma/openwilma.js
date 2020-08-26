@@ -576,14 +576,12 @@ class Parser {
         return new Promise(async (resolve, reject) => {
             try {
                 data = data.split('<!-- Sivukohtainen alue alkaa -->')[1].split('<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 right">')[0]
-                console.log(data)
                 let title = data.split("<h2>")[1].split("</h2>")[0].trim()
                 let content = this.escape(this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", "")))).trim()
                 let authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
                 let authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
                 let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
                 let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
-                console.log(released, removedAt)
                 resolve({
                     title: title,
                     content: content,
