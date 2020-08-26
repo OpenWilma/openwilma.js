@@ -1,4 +1,4 @@
-<p align="center"><img height="200" src="https://i.imgur.com/2qPpef0.png"><br>
+<p align="center"><img height="200" src="https://raw.githubusercontent.com/OpenWilma/openwilma.github.io/master/assets/openwilma/github_banners/openwilma_js_gh_banner.png"><br>
  <a href="https://discord.gg/husTxHa">Chat with us on Discord!</a> | <a href="https://github.com/OpenWilma">Organization</a><br><u>Maintainers</u><br><img height="20" align="center"src="https://avatars2.githubusercontent.com/u/34211401?s=60&v=4"><a href="https://github.com/Esinko">Esinko</a> | <img align="center" height="20" src="https://avatars3.githubusercontent.com/u/46541386?s=460&u=0b7735ff22a2f572b4302f479a0596cbd5c2923d&v=4"><a href="https://github.com/ahnl">Miksu <i>(ahnl)</i></a>
 </p>
 
@@ -9,11 +9,11 @@ A Node.js and browser library for interacting with the Wilma API. <br>Use this s
 
 # Installation 
 ## Node.js
-This Node.js module is not yet available through the npm registry, since it is still heavily in the developement phase and not stable.
+This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
 
 Before installing, download and install Node.js. 
 
-Installation is done using the npm install command, which in our case pulls the module from the GitHub:
+Installation is done using the npm install command, which in our case pulls the module from GitHub:
 
 ```
 $ npm install OpenWilma/openwilma_js
