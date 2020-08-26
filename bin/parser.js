@@ -411,6 +411,20 @@ class Parser {
     escape(string){
         return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
     }
+    convertHtmlToText(html) {
+        html = html.replace(/<a.*?href="(.*?)".*?>(.*?)<\/a>/g, '[$2]($1)');
+        html = html.replace(/<style([\s\S]*?)<\/style>/gi, '');
+        html = html.replace(/<script([\s\S]*?)<\/script>/gi, '');
+        html = html.replace(/<\/div>/ig, '\n');
+        html = html.replace(/<\/li>/ig, '\n');
+        html = html.replace(/<li>/ig, '  *  ');
+        html = html.replace(/<\/ul>/ig, '\n');
+        html = html.replace(/<\/p>/ig, '\n');
+        html = html.replace(/<br\s*[\/]?>/gi, "\n");
+        html = html.replace(/<[^>]+>/ig, '');
+        return html;
+    }
+
     //Normal functions
 
     async messages(data){
@@ -577,14 +591,16 @@ class Parser {
             try {
                 data = data.split('<!-- Sivukohtainen alue alkaa -->')[1].split('<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 right">')[0]
                 let title = data.split("<h2>")[1].split("</h2>")[0].trim()
-                let content = this.escape(this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", "")))).trim()
+                let html = this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", ""))).trim()
+                let content = this.convertHtmlToText(this.toUTF8(html));
+              
                 let authorData = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
                 let authorName = null
                 let authorShort = null
                 let authorId = null
                 if(authorData.includes("/teachers/")){ //Has link
                     authorId = authorData.split("/teachers/")[1].split('"')[0]
-                    authorName = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]
+                    authorName = this.toReverse(this.toReverse(authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]).replace(")", ""))
                     authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
                 }else {
                     authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
@@ -592,8 +608,10 @@ class Parser {
                 }
                 let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
                 let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
+                // Attention to the end user to avoid XSS vulnerabilities: do not print html value as is straight to the user from JSON
                 resolve({
                     title: title,
+                    html: html,
                     content: content,
                     author: {
                         callsign: authorShort,
@@ -608,6 +626,7 @@ class Parser {
             }
         })
     }
+
     async news(data){
         return new Promise(async (resolve, reject) => {
             try {

@@ -91,10 +91,10 @@ For browsers (make sure to correct paths, if needed):
 <script>
     const api = new OpenWilma()
     api.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password").then(async result => {
-    //You are logged in!
-}).catch(async error => {
-    console.log("Something went wrong: ", err)
-})
+        //You are logged in!
+    }).catch(async error => {
+        console.log("Something went wrong: ", err)
+    })
 </script>
 ```
 

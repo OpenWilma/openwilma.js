@@ -214,10 +214,50 @@ class trays { //Trays class
 }
 class news { //News class
     async list(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/news",
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.news(res[1].body).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
-    async getId(){
-
+    async get(id){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/news/" + id,
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token + ";"
+                    }
+                }).then(async res => {
+                    parser.newsEntry(res[1].body).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
 }
 class catalog { //Catalog class
@@ -422,9 +462,10 @@ class OpenWilma {
      * @param {String} server The Wilma server
      * @param {String} username The username of the Wilma account
      * @param {String} password The password of the Wilma account
+     * @param {Boolean} validateServer If the server should be validated or not
      * @returns Promise()
      */
-    async login(server, username, password){ //Login to wilma
+    async login(server, username, password, validateServer){ //Login to wilma
         return new Promise(async (resolve, reject) => {
             try {
                 this._getList().then(async res => {
@@ -440,9 +481,14 @@ class OpenWilma {
                                 break
                             }
                         }
-                        if(found == false){
+                        if(found == false && (validateServer != false || validateServer == undefined)){
                             reject("No such Wilma server available.")
                         }else {
+                            if (validateServer == false && memory.session.server == null) {
+                                // bypassing server validation
+                                memory.session.server = server;
+                                memory.session.serverName = 'Unknown Server';
+                            }
                             request.get({
                                 url: server + "/index_json"
                             }).then(async res1 => {
@@ -473,10 +519,14 @@ class OpenWilma {
                                                         if(res2[1].error != undefined){
                                                             reject(res2[1])
                                                         }else {
-                                                            memory.session.lastRequest = new Date().getTime()
-                                                            this._refreshSession()
-                                                            memory.session.token = res2[1].cookies.Wilma2SID.value
-                                                            resolve()
+                                                            if(res2[1].cookies.Wilma2SID == undefined){
+                                                                reject("Invalid username or password")
+                                                            }else {
+                                                                memory.session.lastRequest = new Date().getTime()
+                                                                this._refreshSession()
+                                                                memory.session.token = res2[1].cookies.Wilma2SID.value
+                                                                resolve()
+                                                            }
                                                         }   
                                                     }
                                                 }).catch(async err1 => {
