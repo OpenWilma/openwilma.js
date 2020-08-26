@@ -394,6 +394,23 @@ class Parser {
         }
         return table
     }
+    fromMinutesToHoursAndMinutes(time){
+        return (time / 60).toFixed(0) + ":" + (((time / 60).toString().split(".")[1] != undefined ? (60 * parseFloat("0." + (time / 60).toString().split(".")[1])).toFixed(0) : "00").toString().length < 2 ? "0" + ((time / 60).toString().split(".")[1] != undefined ? (60 * parseFloat("0." + (time / 60).toString().split(".")[1])).toFixed(0) : "00") : ((time / 60).toString().split(".")[1] != undefined ? (60 * parseFloat("0." + (time / 60).toString().split(".")[1])).toFixed(0) : "00")) 
+    }
+    toReverse(string){
+        return string.split("").reverse().join("")
+    }
+    removeEmptyLines(string){
+        string = string.split("\n")
+        let n = []
+        for(let i = 0; string.length > i; i++){
+            if((string[i].replace(/\r/g, "").replace(/\n/g, "").replace(/ /g, "") == "") == false) n.push(string[i])
+        }
+        return n.join("\n")
+    }
+    escape(string){
+        return string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;")
+    }
     //Normal functions
 
     async messages(data){
@@ -460,8 +477,8 @@ class Parser {
                     schedule.push({
                         id: entry.Id,
                         date: entry.Date,
-                        start: entry.Start,
-                        end: entry.End,
+                        start: this.fromMinutesToHoursAndMinutes(entry.Start),
+                        end: this.fromMinutesToHoursAndMinutes(entry.End),
                         name: entry.Text["0"],
                         fullName: entry.LongText["0"],
                         duringBreak: entry.MinuuttiSij != "0",
@@ -549,6 +566,119 @@ class Parser {
                     });
                 }
                 resolve(results);
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async newsEntry(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                data = data.split('<!-- Sivukohtainen alue alkaa -->')[1].split('<div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 right">')[0]
+                let title = data.split("<h2>")[1].split("</h2>")[0].trim()
+                let content = this.escape(this.removeEmptyLines(this.toReverse(this.toReverse(data.split('id="news-content">')[1].split('<div class="panel-body-padding-remover">')[0]).replace(">vid/<", "")))).trim()
+                let authorData = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
+                let authorName = null
+                let authorShort = null
+                let authorId = null
+                if(authorData.includes("/teachers/")){ //Has link
+                    authorId = authorData.split("/teachers/")[1].split('"')[0]
+                    authorName = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]
+                    authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
+                }else {
+                    authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
+                    authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+                }
+                let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
+                let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
+                resolve({
+                    title: title,
+                    content: content,
+                    author: {
+                        callsign: authorShort,
+                        name: authorName
+                    },
+                    released: released,
+                    toBeRemoved: removedAt
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async news(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let perm = []
+                let _perm = this.removeEmptyLines(data.split('<h2>Pysyvät tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0]).split("\n")
+                for(let i = 0; _perm.length > i; i++){
+                    try {
+                        let entry = _perm[i]
+                        let id = entry.split('href="/news/')[1] != undefined ? entry.split('href="/news/')[1].split('"')[0] : null
+                        if(id == null) continue //Creates an issue in parsing if not there
+                        let title = entry.split('href="/news/' + id + '">')[1] != undefined ? entry.split('href="/news/' + id + '">')[1].split("</a>")[0] : null
+                        perm.push({
+                            id: id,
+                            title: title.replace(/(^(\r\n)|(\r\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
+                        })
+                    }
+                    catch(err){
+                        console.log("OpenWilma response parsing error: ", err)
+                    }
+                }
+                let old = []
+                let _old = this.removeEmptyLines(data.split('<h2>Vanhat tiedotteet</h2>')[1].split(/ {1,}<\/div>/g)[0]).split("\n")
+                for(let i = 0; _old.length > i; i++){
+                    try {
+                        let entry = _old[i]
+                        let id = entry.split('href="/news/')[1] != undefined ? entry.split('href="/news/')[1].split('"')[0] : null
+                        if(id == null) continue //Creates an issue in parsing if not there
+                        let title = entry.split('href="/news/' + id + '">')[1] != undefined ? entry.split('href="/news/' + id + '">')[1].split("</a>")[0] : null
+                        old.push({
+                            id: id,
+                            title: title.replace(/(^(\\r\\n)|(\\r\\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
+                        })
+                    }
+                    catch(err){
+                        console.log("Parsing error: ", err)
+                    }
+                }   
+                let current = data.split('<div class="panel-body">')[3].replace(/( {1,}<)()()/g, "<").replace(/<div class="panel hidden-md-up">/g, "").split("</div>")
+                let _current = []
+                for(let i = 0; current.length > i; i++){
+                    let entry = current[i]
+                    entry = this.removeEmptyLines(entry)
+                    if(entry == "") continue
+                    let title = entry.split("<h3>")[1].split("</h3>")[0].replace(/^( {1,})/gm, "")
+                    let type = 0
+                    let id = entry.split("/news/")[1] != undefined ? entry.split("/news/")[1].split('"')[0] : null
+                    if(id == null) type = 1
+                    let authorId = entry.includes('<a href="/profiles/teachers') ? entry.split('<a href="/profiles/teachers/')[1].split('"')[0] : null
+                    let authorName = entry.includes('class="profile-link" title="') ? entry.split('class="profile-link" title="')[1].split('"')[0] : (entry.includes('class="tooltip" title="') ? entry.split('class="tooltip" title="')[1].split('"')[0] : null)
+                    let authorShort = entry.includes('class="profile-link" title="') ? entry.split('class="profile-link" title="' + authorName + '">')[1].split("<")[0] : (entry.includes('class="tooltip" title="') ? entry.split('class="tooltip" title="' + authorName + '">')[1].split("<")[0] : null)
+                    let description = entry.includes('<p class="sub-text">') ? entry.split('<p class="sub-text">')[1].split("</p>")[0] : null
+                    let date = entry.includes('<h2 class="no-border margin-bottom-inline no-bottom-padding">') ? entry.split('<h2 class="no-border margin-bottom-inline no-bottom-padding">')[1].split("<")[0] : null
+                    _current.push({
+                        id: id,
+                        author: {
+                            name: authorName,
+                            callsign: authorShort,
+                            id: authorId
+                        },
+                        description: description,
+                        date: date,
+                        type: type,
+                        title: title.replace(/(^(\r\n)|(\r\n)$)/gm, "") //Removes some extra stuff from the begging and end of lines
+                    })
+                }
+                current = _current
+                resolve({
+                    pinned: perm,
+                    old: old,
+                    latest: current
+                })
             }
             catch(err){
                 reject(err)
