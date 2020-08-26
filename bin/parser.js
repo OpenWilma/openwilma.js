@@ -617,7 +617,7 @@ class Parser {
                         })
                     }
                     catch(err){
-                        console.log("Parsing error: ", err)
+                        console.log("OpenWilma response parsing error: ", err)
                     }
                 }
                 let old = []
