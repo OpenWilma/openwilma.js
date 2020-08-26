@@ -9,11 +9,11 @@ A Node.js and browser library for interacting with the Wilma API. <br>Use this s
 
 # Installation 
 ## Node.js
-This Node.js module is not yet available through the npm registry, since it is still heavily in the developement phase and not stable.
+This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
 
 Before installing, download and install Node.js. 
 
-Installation is done using the npm install command, which in our case pulls the module from the GitHub:
+Installation is done using the npm install command, which in our case pulls the module from GitHub:
 
 ```
 $ npm install OpenWilma/openwilma_js
