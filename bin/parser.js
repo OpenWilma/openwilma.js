@@ -600,7 +600,7 @@ class Parser {
                 let authorId = null
                 if(authorData.includes("/teachers/")){ //Has link
                     authorId = authorData.split("/teachers/")[1].split('"')[0]
-                    authorName = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]
+                    authorName = this.toReverse(this.toReverse(authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]).replace(")", ""))
                     authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
                 }else {
                     authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
