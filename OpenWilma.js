@@ -524,7 +524,6 @@ class OpenWilma {
                                                             }else {
                                                                 memory.session.lastRequest = new Date().getTime()
                                                                 this._refreshSession()
-                                                                console.log(res2[1].cookies)
                                                                 memory.session.token = res2[1].cookies.Wilma2SID.value
                                                                 resolve()
                                                             }
