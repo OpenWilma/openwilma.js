@@ -106,8 +106,9 @@ For browsers (make sure to correct paths, if needed):
     //<OpenWilma> is known as "api" in this tutorial
     <OpenWilma>.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password", false)
 ```
+- ```OpenWilma parsing error: <error>```, This error is logged into the console and reports an error in OpenWilma's parser. If you encounter this error, please make a [new issue](https://github.com/OpenWilma/openwilma_js/issues/new) on this Github repository with the **whole** logged message, so it can be resolved. (This issue is hardcoded and only occures when the given data format is not supported or something has changed in Wilma's api)
 
-## Extras
+## Extras *(end of quick start)*
 There! You now have a working sample of how to use OpenWilma. You should look at this repository's wiki for more things you can do with OpenWilma.<br>
 Next you can check `test.js` or `test.html` for the latest working examples/tests.
 #### (Wiki still work in progress)
