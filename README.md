@@ -6,7 +6,8 @@
 
 A Node.js and browser library for interacting with the Wilma API. <br>Use this simple and secure library to create your own Wilma enabled applications!
 #### (Library still in development, do not use in production)
-
+### Supported platforms
+This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so exporting your code to the other supported platform is very simple. <br>(Just copy it)
 # Installation 
 ## Node.js
 This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
