@@ -6,7 +6,8 @@
 
 A Node.js and browser library for interacting with the Wilma API. <br>Use this simple and secure library to create your own Wilma enabled applications!
 #### (Library still in development, do not use in production)
-
+### Supported platforms
+This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so exporting your code to the other supported platform is very simple. <br>(Just copy it)
 # Installation 
 ## Node.js
 This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
@@ -25,10 +26,11 @@ Download this repository to your site. You can use this link:
 
 # Quick Start
 This is a simple tutorial on how to get started with OpenWilma. Please follow the correct instructions for your specific platform.
+If you encounter errors, please see the [common errors](https://github.com/OpenWilma/openwilma_js#common-errors) list.
 
 ## Step 1
 
-Make sure you have imported OpenWilma to your project based on your platform using the following instructions.
+Import OpenWilma to your project based on your platform using the following instructions.
 
 For Node.js, do:
 ```js
@@ -104,8 +106,9 @@ For browsers (make sure to correct paths, if needed):
     //<OpenWilma> is known as "api" in this tutorial
     <OpenWilma>.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password", false)
 ```
+- ```OpenWilma parsing error: <error>```, This error is logged into the console and reports an error in OpenWilma's parser. If you encounter this error, please make a [new issue](https://github.com/OpenWilma/openwilma_js/issues/new) on this Github repository with the **whole** logged message, so it can be resolved. (This issue is hardcoded and only occures when the given data format is not supported or something has changed in Wilma's api)
 
-## Extras
+## Extras *(end of quick start)*
 There! You now have a working sample of how to use OpenWilma. You should look at this repository's wiki for more things you can do with OpenWilma.<br>
 Next you can check `test.js` or `test.html` for the latest working examples/tests.
 #### (Wiki still work in progress)
