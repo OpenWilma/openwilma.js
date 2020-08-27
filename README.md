@@ -26,10 +26,11 @@ Download this repository to your site. You can use this link:
 
 # Quick Start
 This is a simple tutorial on how to get started with OpenWilma. Please follow the correct instructions for your specific platform.
+If you encounter errors, please see the [common errors](https://github.com/OpenWilma/openwilma_js#common-errors) list.
 
 ## Step 1
 
-Make sure you have imported OpenWilma to your project based on your platform using the following instructions.
+Import OpenWilma to your project based on your platform using the following instructions.
 
 For Node.js, do:
 ```js
