@@ -598,13 +598,19 @@ class Parser {
                 let authorName = null
                 let authorShort = null
                 let authorId = null
+                console.log("\n-\n", data)
                 if(authorData.includes("/teachers/")){ //Has link
                     authorId = authorData.split("/teachers/")[1].split('"')[0]
                     authorName = this.toReverse(this.toReverse(authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]).replace(")", ""))
                     authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
                 }else {
-                    authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
-                    authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+                    if(!data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim().includes(" (")){ //Handle post by admin / other authority without a normal account
+                        console.log("By admin")
+                        authorName = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
+                    }else {
+                        authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
+                        authorName = this.toReverse(this.toReverse(this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[1]).replace(")", ""))
+                    }
                 }
                 let released = data.split('<span class="small semi-bold no-side-margin pull-right">')[1].split("<")[0].replace("Julkaistu ", "")
                 let removedAt = data.split('<span class="small semi-bold no-side-margin pull-right">')[2].split("<")[0].replace("Poistuu ", "")
@@ -615,7 +621,8 @@ class Parser {
                     content: content,
                     author: {
                         callsign: authorShort,
-                        name: authorName
+                        name: authorName,
+                        id: authorId
                     },
                     released: released,
                     toBeRemoved: removedAt
@@ -698,6 +705,32 @@ class Parser {
                     old: old,
                     latest: current
                 })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async printout(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                data = data.split("<!-- Sivukohtainen alue alkaa -->")[1].split("<!-- Sivukohtainen alue loppuu -->")[0]
+                if(data.includes('<p>Näytettäviä tulosteita ei löytynyt.</p>')){
+                    resolve([])
+                }else {
+                    data = this.removeEmptyLines(data).replace('<p class="margin-bottom">Klikkaa tulosteen nimeä. Tuloste avautuu erilliseen ikkunaan pdf-muodossa. Voit joko tulostaa sen paperille tai tallentaa sen tiedostona esim. muistitikulle.</p>', "").split("<a")
+                    let printouts = []
+                    for(let i = 0; data.length > i; i++){
+                        let entry = data[i].split(">")[0]
+                        if(!entry.includes('href="')) continue
+                        entry = entry.split('href')[1].replace('="', "").split('"')[0]
+                        printouts.push({
+                            type: entry.includes("/printouts/") ? 0 : 1,
+                            url: entry
+                        })
+                    }
+                    resolve(printouts)
+                }
             }
             catch(err){
                 reject(err)

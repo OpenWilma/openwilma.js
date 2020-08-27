@@ -173,7 +173,7 @@ class choices {
 }
 class exams { //Exams class
     async get(id){
-
+        
     }
     async getAll(){
 
@@ -192,7 +192,27 @@ class attendenceSingle {
 }
 class printouts { //Printouts class
     async getAll(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: memory.session.server + "/printouts",
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token
+                    }
+                }).then(async res => {
+                    parser.printout(res[1].body).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
 }
 class feedback {
@@ -468,6 +488,11 @@ class OpenWilma {
     async login(server, username, password, validateServer){ //Login to wilma
         return new Promise(async (resolve, reject) => {
             try {
+                //Check URL format
+                if(/(https|http)(:\/\/)(.{1,})\//g.test(server) || !/(https|http)(:\/\/)(.{1,})/g.test(server)){
+                    reject("Invalid server url format.")
+                    return
+                }
                 this._getList().then(async res => {
                     if(res[0] != null){
                         reject(res[0])
@@ -484,7 +509,7 @@ class OpenWilma {
                         if(found == false && (validateServer != false || validateServer == undefined)){
                             reject("No such Wilma server available.")
                         }else {
-                            if (validateServer == false && memory.session.server == null) {
+                            if(validateServer == false && memory.session.server == null){
                                 // bypassing server validation
                                 memory.session.server = server;
                                 memory.session.serverName = 'Unknown Server';
