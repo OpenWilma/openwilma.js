@@ -424,9 +424,32 @@ class Parser {
         html = html.replace(/<[^>]+>/ig, '');
         return html;
     }
+    toRecipients(list){
+        let construct = ""
+        for(let i = 0; i < list.length; i++){
+            if(construct == ""){
+                construct = list[i].type + "=" + list[i].id
+            }else {
+                construct = construct + "&" + list[i].type + "=" + list[i].id
+            }
+        }
+        return construct
+    }
 
     //Normal functions
 
+    async credentials(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let secret = data.split('name="secret" value="')[1].split('"')[0]
+                let formkey = data.split('name="formkey" value="')[1].split('"')[0]
+                resolve([secret, formkey])
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
     async messages(data){
         return new Promise(async (resolve, reject) => {
             try {
@@ -444,6 +467,60 @@ class Parser {
                             class: this.toCallsign(data[i].Sender)[0] == 2 ? this.toCallsign(data[i].Sender)[1] : null
                         },
                         id: data[i].Id
+                    })
+                }
+                resolve(construct)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async messageRecipients(dataIn){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let data = JSON.parse(dataIn)
+                let list = []
+                //Guardians
+                if(data.GuardianRecords != undefined && data.GuardianRecords.length > 0){
+                    for(let i = 0; i < data.GuardianRecords.length; i++){
+                        data.GuardianRecords[i].type = "r_guardian"
+                        list.push(data.GuardianRecords[i])
+                    }
+                }
+                //Full list
+                if(data.IndexRecords != undefined && data.IndexRecords.length > 0){
+                    //This should not ever have a 2nd element so we should be fine
+                    if(data.IndexRecords[0].TeacherRecords != undefined && data.IndexRecords[0].TeacherRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].TeacherRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowTeacher == undefined) continue
+                            data.IndexRecords[0].TeacherRecords[i].type = "r_teacher"
+                            list.push(data.IndexRecords[0].TeacherRecords[i])
+                        }
+                    }
+                    if(data.IndexRecords[0].PersonnelRecords != undefined && data.IndexRecords[0].PersonnelRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].PersonnelRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowPersonnel == undefined) continue
+                            data.IndexRecords[0].PersonnelRecords[i].type = "r_personel"
+                            list.push(data.IndexRecords[0].PersonnelRecords[i])
+                        }
+                    }
+                    if(data.IndexRecords[0].ClassRecords != undefined && data.IndexRecords[0].ClassRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].ClassRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowClass == undefined) continue //This may not work
+                            data.IndexRecords[0].ClassRecords[i].type = "r_class"
+                            list.push(data.IndexRecords[0].ClassRecords[i])
+                        }
+                    }
+                }
+                let construct = []
+                for(let i = 0; i < list.length; i++){
+                    construct.push({
+                        id: list[i].Id,
+                        type: list[i].type,
+                        name: this.toName(list[i].Caption) != null ? this.toName(list[i].Caption) : list[i].Caption,
+                        callsign: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 1 ? this.toCallsign(list[i].Caption)[1]: null) : null,
+                        class: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 2 ? this.toCallsign(list[i].Caption)[1] : null): null
                     })
                 }
                 resolve(construct)
@@ -471,7 +548,8 @@ class Parser {
                         forward: data.AllowForward,
                         reply: data.AllowReply
                     },
-                    content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, ""))
+                    content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, "")),
+                    id: data.Id
                 })
             }
             catch(err){

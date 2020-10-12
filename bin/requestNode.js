@@ -178,8 +178,13 @@ class Request {
                                             for(let i=0; ar.length > i;i++){
                                                 let name = ar[i]
                                                 let value = options.body[name]
-                                                if(temp != "") temp = temp + "&"
-                                                temp = temp + encodeURIComponent(name) + "=" + encodeURIComponent(value)
+                                                if(options.args == "!encode=" + name){
+                                                    if(temp != "") temp = temp + "&"
+                                                    temp = temp + value
+                                                }else {
+                                                    if(temp != "") temp = temp + "&"
+                                                    temp = temp + encodeURIComponent(name) + "=" + encodeURIComponent(value)
+                                                }
                                             }
                                             format = temp
                                             break

@@ -8,7 +8,6 @@ let request = null
 const config = {
     supportedApiVersions: ["11"]
 }
-const messageDirs = ["archive", "drafts", "sent"]
 // -- Memory --
 let memory = {
     session: {
@@ -16,7 +15,9 @@ let memory = {
         sessionId: null,
         server: null,
         serverName: "",
-        lastRequest: null
+        lastRequest: null,
+        secret: null,
+        formkey: null
     },
     cache: { //TODO: Implement caching with 30s intervals
         messages: {
@@ -32,17 +33,137 @@ let memory = {
 
 // -- Classes --
 class message { //Class for each message
-    async markAsRead(){
-        
-    }
     async archive(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "inbox"){
+                    request.post({
+                        url: memory.session.server + "/messages/archivetool/",
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot archive a message that is not in the inbox")
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
     async unArchive(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "archive"){
+                    request.post({
+                        url: memory.session.server + "/messages/restorearchived/",
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot unarchive a message that is not in the archive")
+                }
+            }   
+            catch(err){
+                reject(err)
+            }
+        })
     }
     async delete(){
-
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.post({
+                    url: memory.session.server + "/messages/delete/",
+                    body: {
+                        formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                        secret: memory.session.secret,
+                        mid: this.id
+                    },
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then(async res => {
+                    if(res[1].status == 200){
+                        resolve()
+                    }
+                }).catch(async err => {
+                    reject(err)
+                })
+            }   
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async edit(){
+        //WIP
+    }
+    async send(){
+        //WIP
+    }
+    async forward(){
+        //WIP
+    }
+    async reply(){
+        //WIP
+    }
+    async recall(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "outbox"){
+                    request.post({
+                        url: memory.session.server + "/messages/recall/" + this.id,
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot recall a message that is not in the sent folder")
+                }
+            }   
+            catch(err){
+                reject(err)
+            }
+        })
     }
 }
 class messages { //Messages class
@@ -81,9 +202,10 @@ class messages { //Messages class
     async getAll(category){
         return new Promise(async (resolve, reject) => {
             try {
-                if(category == "inbox" || category == undefined){
+                let messageDirs = ["archive", "drafts", "outbox", "inbox"]
+                if(messageDirs.includes(category)){
                     request.get({
-                        url: memory.session.server + "/messages/list",
+                        url: memory.session.server + "/messages/list" + (category == "inbox" ? "" : "/" + category),
                         headers: {
                             Cookie: "Wilma2SID=" + memory.session.token
                         }
@@ -100,11 +222,7 @@ class messages { //Messages class
                         reject(err)
                     })
                 }else {
-                    if(messageDirs.includes(category)){
-                        
-                    }else {
-                        reject("Unkown category. Supported: " + messageDirs.join(", "))
-                    }
+                    reject("Unkown message category. Available categories: " + messageDirs.join(", "))
                 }
             }
             catch(err){
@@ -112,8 +230,104 @@ class messages { //Messages class
             }
         })
     }
-    async send(){
-        //TODO: How the f Do I do this again :p
+    async getRecipients(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                //Get recipients 
+                //I am aware that there are more recipients that what this request gives us. But due to the limits of the testing accounts available these will have to do.
+                request.get({
+                    url: memory.session.server + "/messages/recipients/?select_recipients&format=json",
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token
+                    }
+                }).then(async res => {
+                    //console.log(res[1].body)
+                    parser.messageRecipients(res[1].body).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async send(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
+        return new Promise(async (resolve, reject) => {
+            try {
+                //Get recipients 
+                this.getRecipients().then(async list => {
+                    //Make sure the recipients are valid
+                    let validated = true
+                    let recipientsList = []
+                    for(let i = 0; i < recipients.length; i++){
+                        let id = recipients[i]
+                        let found = false
+                        let type = null
+                        for(let i2 = 0; i2 < list.length; i2++){
+                            if(list[i2].id == id){
+                                found = true
+                                type = list[i2].type
+                                break
+                            }
+                        }
+                        if(found == false){
+                            validated = false
+                            break
+                        }else {
+                            recipientsList.push({
+                                id: id,
+                                type: type
+                            })
+                        }
+                    }
+                    if(validated == false){
+                        reject("The recipent in index: " + i + ", is invalid.")
+                    }else {
+                        //Send
+                        request.post({
+                            url: memory.session.server + "/messages/compose/",
+                            body: {
+                                format: "json",
+                                CompleteJson: null,
+                                Subject: title,
+                                BodyText: content,
+                                wysiwyg: "ckeditor", //Enable html,
+                                formkey: memory.session.formkey,
+                                secret: memory.session.secret,
+                                addsavebtn: "Lähetä viesti", //We want to send the message,
+                                CollatedReplies: CollatedReplies.toString(),
+                                ShowRecipients: showRecipients.toString(),
+                                recipients: await parser.toRecipients(recipientsList)
+                            },
+                            headers: {
+                                Cookie: "Wilma2SID=" + memory.session.token,
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            args: ["!encode=recipients"]
+                        }).then(async res => {
+                            if(res[1].status == 200 && res[1].body.includes('<strong>Viesti on nyt lähetetty.</strong>')){
+                                resolve()
+                            }else {
+                                reject("Something went wrong while sending the message.")
+                            }  
+                        }).catch(async err => {
+                            reject(err)
+                        })
+                    }
+
+                }).catch(async err => {
+                    reject(err)
+                })
+            }
+            catch(err){
+                reject(err)
+            }
+        })
     }
 }
 class schedule { //Schedule class
@@ -461,7 +675,10 @@ class OpenWilma {
             if((memory.session.lastRequest + 25) >= new Date().getTime()){
                 request.get({
                     url: memory.session.server + "/overview", //Is this valid?
-                    args: ["NoRedirects"]
+                    args: ["NoRedirects"],
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                    }
                 }).then(async res => {
                     memory.session.lastRequest = new Date().getTime()
                 }).catch(async err => {
@@ -547,10 +764,27 @@ class OpenWilma {
                                                             if(res2[1].cookies.Wilma2SID == undefined){
                                                                 reject("Invalid username or password")
                                                             }else {
-                                                                memory.session.lastRequest = new Date().getTime()
-                                                                this._refreshSession()
                                                                 memory.session.token = res2[1].cookies.Wilma2SID.value
-                                                                resolve()
+                                                                //Get the secret and formkey
+                                                                request.get({
+                                                                    url: server + "/messages",
+                                                                    headers: {
+                                                                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                                                                    }
+                                                                }).then(async res => {
+                                                                    parser.credentials(res[1].body).then(async ar => {
+                                                                        memory.session.secret = ar[0]
+                                                                        memory.session.formkey = ar[1]
+                                                                        //Done
+                                                                        memory.session.lastRequest = new Date().getTime()
+                                                                        this._refreshSession()
+                                                                        resolve()
+                                                                    }).catch(async err => {
+                                                                        reject(err)
+                                                                    })
+                                                                }).catch(async err => {
+                                                                    reject(err)
+                                                                })
                                                             }
                                                         }   
                                                     }

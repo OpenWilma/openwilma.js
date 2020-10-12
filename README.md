@@ -76,13 +76,18 @@ For browsers, do:
 ```
 
 ## Step 4
-Perform some simple operations against the Wilma "api". Below there will be a **complete** script to get the logged in users schedule.
+Perform some simple operations against the Wilma "api". Below there will be a **complete** script to get the messages in the user's inbox.
 For Node.js:
 ```js
 const OpenWilma = require("openwilma")
 const api = new OpenWilma()
 api.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password").then(async result => {
     //You are logged in!
+    api.messages.getAll("inbox").then(async result => {
+        console.log("Messages in the inbox:\n", result)
+    }).catch(async error => {
+        console.log("Something went wrong: ", err)
+    })
 }).catch(async error => {
     console.log("Something went wrong: ", err)
 })
