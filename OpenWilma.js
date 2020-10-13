@@ -32,141 +32,105 @@ let memory = {
 }
 
 // -- Classes --
-class message { //Class for each message
-    async archive(){
+class messages { //Messages class
+    async create(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
             try {
-                if(this.folder == "inbox"){
-                    request.post({
-                        url: memory.session.server + "/messages/archivetool/",
-                        body: {
-                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
-                            secret: memory.session.secret,
-                            mid: this.id
-                        },
-                        headers: {
-                            Cookie: "Wilma2SID=" + memory.session.token,
-                            "Content-Type": "application/x-www-form-urlencoded"
+                //Get recipients 
+                this.getRecipients().then(async list => {
+                    //Make sure the recipients are valid
+                    let validated = true
+                    let recipientsList = []
+                    let failedI = null
+                    for(let i = 0; i < recipients.length; i++){
+                        let id = recipients[i]
+                        failedI = i
+                        let found = false
+                        let type = null
+                        let pswdId = null
+                        for(let i2 = 0; i2 < list.length; i2++){
+                            if(id.includes("_")){
+                                if(list[i2].passwdid != undefined){
+                                    if((list[i2].id + "_" + list[i2].passwdid) == id){
+                                        found = true
+                                        type = list[i2].type
+                                        pswdId = list[i2].passwdid
+                                        break
+                                    }
+                                }
+                            }else {
+                                if(list[i2].id == id){
+                                    found = true
+                                    type = list[i2].type
+                                    if(list[i2].passwdid != undefined){
+                                        pswdId = list[i2].passwdid
+                                    }
+                                    break
+                                }
+                            }
                         }
-                    }).then(async res => {
-                        if(res[1].status == 200){
-                            resolve()
+                        if(found == false){
+                            validated = false
+                            break
+                        }else {
+                            recipientsList.push({
+                                id: id + (pswdId == null || id.includes("_") ? "" : "_" + pswdId),
+                                type: type
+                            })
                         }
-                    }).catch(async err => {
-                        reject(err)
-                    })
-                }else {
-                    reject("Cannot archive a message that is not in the inbox")
-                }
-            }
-            catch(err){
-                reject(err)
-            }
-        })
-    }
-    async unArchive(){
-        return new Promise(async (resolve, reject) => {
-            try {
-                if(this.folder == "archive"){
-                    request.post({
-                        url: memory.session.server + "/messages/restorearchived/",
-                        body: {
-                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
-                            secret: memory.session.secret,
-                            mid: this.id
-                        },
-                        headers: {
-                            Cookie: "Wilma2SID=" + memory.session.token,
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        }
-                    }).then(async res => {
-                        if(res[1].status == 200){
-                            resolve()
-                        }
-                    }).catch(async err => {
-                        reject(err)
-                    })
-                }else {
-                    reject("Cannot unarchive a message that is not in the archive")
-                }
-            }   
-            catch(err){
-                reject(err)
-            }
-        })
-    }
-    async delete(){
-        return new Promise(async (resolve, reject) => {
-            try {
-                request.post({
-                    url: memory.session.server + "/messages/delete/",
-                    body: {
-                        formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
-                        secret: memory.session.secret,
-                        mid: this.id
-                    },
-                    headers: {
-                        Cookie: "Wilma2SID=" + memory.session.token,
-                        "Content-Type": "application/x-www-form-urlencoded"
                     }
-                }).then(async res => {
-                    if(res[1].status == 200){
-                        resolve()
+                    if(validated == false){
+                        reject("The recipent in index: " + failedI + ", is invalid.")
+                    }else {
+                        //Send
+                        request.post({
+                            url: memory.session.server + "/messages/compose/",
+                            body: {
+                                format: "json",
+                                CompleteJson: null,
+                                Subject: title,
+                                BodyText: content,
+                                wysiwyg: "ckeditor", //Enable html,
+                                formkey: memory.session.formkey,
+                                secret: memory.session.secret,
+                                draftbtn: "Tallenna luonnos", //We want to save the message,
+                                CollatedReplies: CollatedReplies.toString(),
+                                ShowRecipients: showRecipients.toString(),
+                                recipients: await parser.toRecipients(recipientsList)
+                            },
+                            headers: {
+                                Cookie: "Wilma2SID=" + memory.session.token,
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            args: ["!encode=recipients"]
+                        }).then(async res => {
+                            if(res[1].status == 200){
+                                this.getAll("outbox").then(async list => {
+                                    this.get(list[0].id).then(async message => {
+                                        resolve(message)
+                                    }).catch(async err => {
+                                        reject(err)
+                                    })
+                                }).catch(async err => {
+                                    reject(err)
+                                })
+                            }else {
+                                reject("Something went wrong while sending the message.")
+                            }  
+                        }).catch(async err => {
+                            reject(err)
+                        })
                     }
+
                 }).catch(async err => {
                     reject(err)
                 })
-            }   
+            }
             catch(err){
                 reject(err)
             }
         })
     }
-    async edit(){
-        //WIP
-    }
-    async send(){
-        //WIP
-    }
-    async forward(){
-        //WIP
-    }
-    async reply(){
-        //WIP
-    }
-    async recall(){
-        return new Promise(async (resolve, reject) => {
-            try {
-                if(this.folder == "outbox"){
-                    request.post({
-                        url: memory.session.server + "/messages/recall/" + this.id,
-                        body: {
-                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
-                            secret: memory.session.secret,
-                            mid: this.id
-                        },
-                        headers: {
-                            Cookie: "Wilma2SID=" + memory.session.token,
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        }
-                    }).then(async res => {
-                        if(res[1].status == 200){
-                            resolve()
-                        }
-                    }).catch(async err => {
-                        reject(err)
-                    })
-                }else {
-                    reject("Cannot recall a message that is not in the sent folder")
-                }
-            }   
-            catch(err){
-                reject(err)
-            }
-        })
-    }
-}
-class messages { //Messages class
     async get(id){
         return new Promise(async (resolve, reject) => {
             try {
@@ -264,15 +228,32 @@ class messages { //Messages class
                     //Make sure the recipients are valid
                     let validated = true
                     let recipientsList = []
+                    let failedI = null
                     for(let i = 0; i < recipients.length; i++){
                         let id = recipients[i]
+                        failedI = i
                         let found = false
                         let type = null
+                        let pswdId = null
                         for(let i2 = 0; i2 < list.length; i2++){
-                            if(list[i2].id == id){
-                                found = true
-                                type = list[i2].type
-                                break
+                            if(id.includes("_")){
+                                if(list[i2].passwdid != undefined){
+                                    if((list[i2].id + "_" + list[i2].passwdid) == id){
+                                        found = true
+                                        type = list[i2].type
+                                        pswdId = list[i2].passwdid
+                                        break
+                                    }
+                                }
+                            }else {
+                                if(list[i2].id == id){
+                                    found = true
+                                    type = list[i2].type
+                                    if(list[i2].passwdid != undefined){
+                                        pswdId = list[i2].passwdid
+                                    }
+                                    break
+                                }
                             }
                         }
                         if(found == false){
@@ -280,13 +261,13 @@ class messages { //Messages class
                             break
                         }else {
                             recipientsList.push({
-                                id: id,
+                                id: id + (pswdId == null || id.includes("_") ? "" : "_" + pswdId),
                                 type: type
                             })
                         }
                     }
                     if(validated == false){
-                        reject("The recipent in index: " + i + ", is invalid.")
+                        reject("The recipent in index: " + failedI + ", is invalid.")
                     }else {
                         //Send
                         request.post({
@@ -311,7 +292,15 @@ class messages { //Messages class
                             args: ["!encode=recipients"]
                         }).then(async res => {
                             if(res[1].status == 200 && res[1].body.includes('<strong>Viesti on nyt lähetetty.</strong>')){
-                                resolve()
+                                this.getAll("outbox").then(async list => {
+                                    this.get(list[0].id).then(async message => {
+                                        resolve(message)
+                                    }).catch(async err => {
+                                        reject(err)
+                                    })
+                                }).catch(async err => {
+                                    reject(err)
+                                })
                             }else {
                                 reject("Something went wrong while sending the message.")
                             }  
@@ -324,6 +313,396 @@ class messages { //Messages class
                     reject(err)
                 })
             }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+}
+class message extends messages { //Class for each message
+    constructor(){
+        super()
+        //Then disable some stuff
+        this.create = undefined
+    }
+    async archive(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "inbox"){
+                    request.post({
+                        url: memory.session.server + "/messages/archivetool/",
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot archive a message that is not in the inbox")
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async unArchive(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "archive"){
+                    request.post({
+                        url: memory.session.server + "/messages/restorearchived/",
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot unarchive a message that is not in the archive")
+                }
+            }   
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async delete(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.post({
+                    url: memory.session.server + "/messages/delete/",
+                    body: {
+                        formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                        secret: memory.session.secret,
+                        mid: this.id
+                    },
+                    headers: {
+                        Cookie: "Wilma2SID=" + memory.session.token,
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                }).then(async res => {
+                    if(res[1].status == 200){
+                        resolve()
+                    }
+                }).catch(async err => {
+                    reject(err)
+                })
+            }   
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async edit(newtitle, newrecipients, newcontent, showRecipients, CollatedReplies){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "drafts"){
+                    if(newrecipients != null){
+                        //Get recipients 
+                        this.getRecipients().then(async list => {
+                            //Make sure the recipients are valid
+                            let validated = true
+                            let recipientsList = []
+                            let failedI = null
+                            for(let i = 0; i < newrecipients.length; i++){
+                                let id = newrecipients[i]
+                                failedI = i
+                                let found = false
+                                let type = null
+                                let pswdId = null
+                                for(let i2 = 0; i2 < list.length; i2++){
+                                    if(id.includes("_")){
+                                        if(list[i2].passwdid != undefined){
+                                            if((list[i2].id + "_" + list[i2].passwdid) == id){
+                                                found = true
+                                                type = list[i2].type
+                                                pswdId = list[i2].passwdid
+                                                break
+                                            }
+                                        }
+                                    }else {
+                                        if(list[i2].id == id){
+                                            found = true
+                                            type = list[i2].type
+                                            if(list[i2].passwdid != undefined){
+                                                pswdId = list[i2].passwdid
+                                            }
+                                            break
+                                        }
+                                    }
+                                }
+                                if(found == false){
+                                    validated = false
+                                    break
+                                }else {
+                                    recipientsList.push({
+                                        id: id + (pswdId == null || id.includes("_") ? "" : "_" + pswdId),
+                                        type: type
+                                    })
+                                }
+                            }
+                            if(validated == false){
+                                reject("The recipent in index: " + failedI + ", is invalid.")
+                            }else {
+                                request.post({
+                                    url: memory.session.server + "/messages/compose",
+                                    body: {
+                                        mid: this.id,
+                                        format: "json",
+                                        CompleteJson: null,
+                                        Subject: newtitle != null ? newtitle : this.title,
+                                        BodyText: newcontent != null ? newcontent : this.content,
+                                        wysiwyg: "ckeditor", //Enable html,
+                                        formkey: memory.session.formkey,
+                                        secret: memory.session.secret,
+                                        draftbtn: "Tallenna luonnos", //We want to save the message,
+                                        CollatedReplies: CollatedReplies != null ? CollatedReplies.toString() : this.permissions.reply.toString(),
+                                        ShowRecipients: showRecipients != null ? showRecipients.toString() : this.permissions.forward.toString(),
+                                        recipients: await parser.toRecipients(recipientsList)
+                                    },
+                                    headers: {
+                                        Cookie: "Wilma2SID=" + memory.session.token,
+                                        "Content-Type": "application/x-www-form-urlencoded"
+                                    },
+                                    args: ["!encode=recipients"]
+                                }).then(async res => {
+                                    this.getAll("drafts").then(async list => {
+                                        this.get(list[0].id).then(async message => {
+                                            if(message != this){
+                                                resolve(message)
+                                            }else {
+                                                reject("Failed to edit draft.")
+                                            }
+                                        }).catch(async err => {
+                                            reject(err)
+                                        })
+                                    }).catch(async err => {
+                                        reject(err)
+                                    })
+                                }).catch(async err => {
+                                    reject(err)
+                                })
+                            }
+
+                        }).catch(async err => {
+                            reject(err)
+                        })
+                    }else {
+                        //Fetch existing data
+                        request.get({
+                            url: memory.session.server + "/messages/compose?mid=" + this.id,
+                            headers: {
+                                Cookie: "Wilma2SID=" + memory.session.token
+                            }
+                        }).then(async res => {
+                            parser.draftRecipients(res[1].body).then(async list => {
+                                //Now we have a list of the existing recipients (which is stupidly hard to get)
+                                //Send
+                                request.post({
+                                    url: memory.session.server + "/messages/compose/",
+                                    body: {
+                                        mid: this.id,
+                                        format: "json",
+                                        CompleteJson: null,
+                                        Subject: newtitle != null ? newtitle : this.title,
+                                        BodyText: newcontent != null ? newcontent : this.content,
+                                        wysiwyg: "ckeditor", //Enable html,
+                                        formkey: memory.session.formkey,
+                                        secret: memory.session.secret,
+                                        draftbtn: "Tallenna luonnos", //We want to save the message,
+                                        CollatedReplies: CollatedReplies != null ? CollatedReplies.toString() : this.permissions.reply.toString(),
+                                        ShowRecipients: showRecipients != null ? showRecipients.toString() : this.permissions.forward.toString(),
+                                        recipients: await parser.toRecipients(list)
+                                    },
+                                    headers: {
+                                        Cookie: "Wilma2SID=" + memory.session.token,
+                                        "Content-Type": "application/x-www-form-urlencoded"
+                                    },
+                                    args: ["!encode=recipients"]
+                                }).then(async res => {
+                                    this.getAll("drafts").then(async list => {
+                                        this.get(list[0].id).then(async message => {
+                                            resolve(message)
+                                        }).catch(async err => {
+                                            reject(err)
+                                        })
+                                    }).catch(async err => {
+                                        reject(err)
+                                    })
+                                }).catch(async err => {
+                                    reject(err)
+                                })
+                            }).catch(async err => {
+                                reject(err)
+                            })
+                        }).catch(async err => {
+                            reject(err)
+                        })  
+                    }
+                }else {
+                    reject("Cannot edit a message that is not the drafts folder.")
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async sendDraft(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "drafts"){
+                    //Fetch existing data
+                    request.get({
+                        url: memory.session.server + "/messages/compose?mid=" + this.id,
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token
+                        }
+                    }).then(async res => {
+                        parser.draftRecipients(res[1].body).then(async list => {
+                            //Now we have a list of the existing recipients (which is stupidly hard to get)
+                            //Send
+                            request.post({
+                                url: memory.session.server + "/messages/compose/",
+                                body: {
+                                    mid: this.id,
+                                    format: "json",
+                                    CompleteJson: null,
+                                    Subject: this.title,
+                                    BodyText: this.content,
+                                    wysiwyg: "ckeditor", //Enable html,
+                                    formkey: memory.session.formkey,
+                                    secret: memory.session.secret,
+                                    addsavebtn: "Lähetä viesti", //We want to send the message,
+                                    CollatedReplies: this.permissions.reply.toString(),
+                                    ShowRecipients: this.permissions.forward.toString(),
+                                    recipients: await parser.toRecipients(list)
+                                },
+                                headers: {
+                                    Cookie: "Wilma2SID=" + memory.session.token,
+                                    "Content-Type": "application/x-www-form-urlencoded"
+                                },
+                                args: ["!encode=recipients"]
+                            }).then(async res => {
+                                this.getAll("outbox").then(async list => {
+                                    if(list[0].id == this.id){
+                                        this.get(list[0].id).then(async message => {
+                                            resolve(message)
+                                        }).catch(async err => {
+                                            reject(err)
+                                        })   
+                                    }else {
+                                        reject("Failed to send the message")
+                                    }
+                                }).catch(async err => {
+                                    reject(err)
+                                })
+                            }).catch(async err => {
+                                reject(err)
+                            })
+                        }).catch(async err => {
+                            reject(err)
+                        })
+                    }).catch(async err => {
+                        reject(err)
+                    })  
+                }else {
+                    reject("Cannot send a message that is not in the drafts folder.")
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+        //mid=
+    }
+    async forward(){
+        //WIP
+    }
+    async reply(content, showRecipients, CollatedReplies){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.permissions.reply == true){
+                    //Collated reply
+                    request.post({
+                        url: memory.session.server + "/messages/collatedreply/" + this.id,
+                        body: {
+                            format: "json",
+                            CompleteJson: null,
+                            BodyText: content,
+                            wysiwyg: "ckeditor", //Enable html,
+                            formkey: memory.session.formkey,
+                            secret: memory.session.secret
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        resolve()
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    this.send("RE: " + this.title, [this.author.id], content, showRecipients, CollatedReplies).then(async res => {
+                        resolve(res)
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async recall(){
+        return new Promise(async (resolve, reject) => {
+            try {
+                if(this.folder == "outbox"){
+                    request.post({
+                        url: memory.session.server + "/messages/recall/" + this.id,
+                        body: {
+                            formkey: memory.session.formkey, //These credentials are sometimes not needed? We'll include these just in case as wilma alaways includes these regardless. (second entry below this comment)
+                            secret: memory.session.secret,
+                            mid: this.id
+                        },
+                        headers: {
+                            Cookie: "Wilma2SID=" + memory.session.token,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    }).then(async res => {
+                        if(res[1].status == 200){
+                            resolve()
+                        }
+                    }).catch(async err => {
+                        reject(err)
+                    })
+                }else {
+                    reject("Cannot recall a message that is not in the sent folder")
+                }
+            }   
             catch(err){
                 reject(err)
             }

@@ -9,11 +9,7 @@ session._getList().then(async res => { //FOR TESTING ONLY, NOT REQUIRED
     console.log("Compatible runtime!")
     session.login(server, user, password, false).then(async res => {
         console.log("Logged in!")
-        session.messages.send("Testi 2", [93876], "Tämä on testiviesti ignore", true, true).then(async res => {
-            console.log("Message sent!")
-        }).catch(async err => {
-            console.log(err)
-        })
+        //Tests for messages redacted for privacy reasons
     }).catch(async err => {
         console.log(err)
     })

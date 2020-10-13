@@ -160,13 +160,30 @@ class Request {
                                     if(this.readyState == 4) {
                                         this.status = this.status.toString()
                                         if(this.status.startsWith("2") || (this.status.startsWith("3") && options.args.includes("NoRedirects"))){
-                                            resolve([null, {
-                                                status: req.status,
-                                                body: req.responseText,
-                                                message: req.statusText,
-                                                headers: new headers(this.getAllResponseHeaders()),
-                                                cookies: new cookies(new headers(this.getAllResponseHeaders()))
-                                            }])
+                                            if(req.responseText.startsWith('{"error":')){
+                                                try {
+                                                    let error = JSON.parse(req.responseText)
+                                                    reject(error)
+                                                }
+                                                catch(err){
+                                                    //Resolve regardless
+                                                    resolve([null, {
+                                                        status: req.status,
+                                                        body: req.responseText,
+                                                        message: req.statusText,
+                                                        headers: new headers(this.getAllResponseHeaders()),
+                                                        cookies: new cookies(new headers(this.getAllResponseHeaders()))
+                                                    }])
+                                                }
+                                            }else {
+                                                resolve([null, {
+                                                    status: req.status,
+                                                    body: req.responseText,
+                                                    message: req.statusText,
+                                                    headers: new headers(this.getAllResponseHeaders()),
+                                                    cookies: new cookies(new headers(this.getAllResponseHeaders()))
+                                                }])
+                                            }
                                         }else if(res.statusCode.startsWith("3")){
                                             let loc = new headers(this.getAllResponseHeaders()).location
                                             try {

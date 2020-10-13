@@ -139,13 +139,30 @@ class Request {
                                 res.on("end", async () => {
                                     res.statusCode = res.statusCode.toString()
                                     if(res.statusCode.startsWith("2") || (res.statusCode.startsWith("3") && options.args.includes("NoRedirects"))){
-                                        resolve([null, {
-                                            status: res.statusCode,
-                                            body: collection,
-                                            message: res.statusMessage,
-                                            headers: res.headers,
-                                            cookies: new cookies(res.headers)
-                                        }])
+                                        if(collection.startsWith('{"error":')){
+                                            try {
+                                                let error = JSON.parse(collection)
+                                                reject(error)
+                                            }
+                                            catch(err){
+                                                //Resolve regardless
+                                                resolve([null, {
+                                                    status: res.statusCode,
+                                                    body: collection,
+                                                    message: res.statusMessage,
+                                                    headers: res.headers,
+                                                    cookies: new cookies(res.headers)
+                                                }])
+                                            }
+                                        }else {
+                                            resolve([null, {
+                                                status: res.statusCode,
+                                                body: collection,
+                                                message: res.statusMessage,
+                                                headers: res.headers,
+                                                cookies: new cookies(res.headers)
+                                            }])
+                                        }
                                     }else if(res.statusCode.startsWith("3")){
                                         let loc = res.headers.location
                                         try {

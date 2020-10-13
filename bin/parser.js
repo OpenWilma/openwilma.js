@@ -450,6 +450,41 @@ class Parser {
             }
         })
     }
+    async draft(dataIn){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let data = JSON.parse(dataIn)
+
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async draftRecipients(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                data = data.split('id="messages-recipients-cell">')[1].split("</div>")[0]
+                data = data.replace(/\<\/span\>/g, "").split('<span class="recipient-item">')
+                data.splice(0, 1)
+                let list = []
+                for(let i = 0; i < data.length; i++){
+                    let item = data[i]
+                    item = item.split('input type="hidden"')[1].split(">")[0]
+                    let id = item.split('value="')[1].split('"')[0]
+                    let type = item.split('name="')[1].split('"')[0]
+                    list.push({
+                        id: id,
+                        type: type
+                    })
+                }
+                resolve(list)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
     async messages(data){
         return new Promise(async (resolve, reject) => {
             try {
@@ -520,7 +555,8 @@ class Parser {
                         type: list[i].type,
                         name: this.toName(list[i].Caption) != null ? this.toName(list[i].Caption) : list[i].Caption,
                         callsign: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 1 ? this.toCallsign(list[i].Caption)[1]: null) : null,
-                        class: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 2 ? this.toCallsign(list[i].Caption)[1] : null): null
+                        class: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 2 ? this.toCallsign(list[i].Caption)[1] : null): null,
+                        passwdid: list[i].PasswdID
                     })
                 }
                 resolve(construct)
@@ -545,8 +581,8 @@ class Parser {
                         class: this.toCallsign(data.Sender)[0] == 2 ? this.toCallsign(data.Sender)[1] : null
                     },
                     permissions: {
-                        forward: data.AllowForward,
-                        reply: data.AllowReply
+                        forward: data.AllowForward != undefined ? data.AllowForward : true, //In drafts this is missing, why?
+                        reply: data.AllowCollatedReply
                     },
                     content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, "")),
                     id: data.Id
@@ -676,14 +712,12 @@ class Parser {
                 let authorName = null
                 let authorShort = null
                 let authorId = null
-                console.log("\n-\n", data)
                 if(authorData.includes("/teachers/")){ //Has link
                     authorId = authorData.split("/teachers/")[1].split('"')[0]
                     authorName = this.toReverse(this.toReverse(authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]).replace(")", ""))
                     authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
                 }else {
                     if(!data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim().includes(" (")){ //Handle post by admin / other authority without a normal account
-                        console.log("By admin")
                         authorName = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
                     }else {
                         authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
@@ -746,7 +780,7 @@ class Parser {
                         })
                     }
                     catch(err){
-                        console.log("Parsing error: ", err)
+                        console.log("OpenWilma response parsing error: ", err)
                     }
                 }   
                 let current = data.split('<div class="panel-body">')[3].replace(/( {1,}<)()()/g, "<").replace(/<div class="panel hidden-md-up">/g, "").split("</div>")
