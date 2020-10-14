@@ -424,9 +424,67 @@ class Parser {
         html = html.replace(/<[^>]+>/ig, '');
         return html;
     }
+    toRecipients(list){
+        let construct = ""
+        for(let i = 0; i < list.length; i++){
+            if(construct == ""){
+                construct = list[i].type + "=" + list[i].id
+            }else {
+                construct = construct + "&" + list[i].type + "=" + list[i].id
+            }
+        }
+        return construct
+    }
 
     //Normal functions
 
+    async credentials(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let secret = data.split('name="secret" value="')[1].split('"')[0]
+                let formkey = data.split('name="formkey" value="')[1].split('"')[0]
+                resolve([secret, formkey])
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async draft(dataIn){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let data = JSON.parse(dataIn)
+
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
+    async draftRecipients(data){
+        return new Promise(async (resolve, reject) => {
+            try {
+                data = data.split('id="messages-recipients-cell">')[1].split("</div>")[0]
+                data = data.replace(/\<\/span\>/g, "").split('<span class="recipient-item">')
+                data.splice(0, 1)
+                let list = []
+                for(let i = 0; i < data.length; i++){
+                    let item = data[i]
+                    item = item.split('input type="hidden"')[1].split(">")[0]
+                    let id = item.split('value="')[1].split('"')[0]
+                    let type = item.split('name="')[1].split('"')[0]
+                    list.push({
+                        id: id,
+                        type: type
+                    })
+                }
+                resolve(list)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
     async messages(data){
         return new Promise(async (resolve, reject) => {
             try {
@@ -453,6 +511,61 @@ class Parser {
             }
         })
     }
+    async messageRecipients(dataIn){
+        return new Promise(async (resolve, reject) => {
+            try {
+                let data = JSON.parse(dataIn)
+                let list = []
+                //Guardians
+                if(data.GuardianRecords != undefined && data.GuardianRecords.length > 0){
+                    for(let i = 0; i < data.GuardianRecords.length; i++){
+                        data.GuardianRecords[i].type = "r_guardian"
+                        list.push(data.GuardianRecords[i])
+                    }
+                }
+                //Full list
+                if(data.IndexRecords != undefined && data.IndexRecords.length > 0){
+                    //This should not ever have a 2nd element so we should be fine
+                    if(data.IndexRecords[0].TeacherRecords != undefined && data.IndexRecords[0].TeacherRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].TeacherRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowTeacher == undefined) continue
+                            data.IndexRecords[0].TeacherRecords[i].type = "r_teacher"
+                            list.push(data.IndexRecords[0].TeacherRecords[i])
+                        }
+                    }
+                    if(data.IndexRecords[0].PersonnelRecords != undefined && data.IndexRecords[0].PersonnelRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].PersonnelRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowPersonnel == undefined) continue
+                            data.IndexRecords[0].PersonnelRecords[i].type = "r_personel"
+                            list.push(data.IndexRecords[0].PersonnelRecords[i])
+                        }
+                    }
+                    if(data.IndexRecords[0].ClassRecords != undefined && data.IndexRecords[0].ClassRecords.length > 0){
+                        for(let i = 0; i < data.IndexRecords[0].ClassRecords.length; i++){
+                            if(data.IndexRecords[0].TeacherRecords[i].AllowClass == undefined) continue //This may not work
+                            data.IndexRecords[0].ClassRecords[i].type = "r_class"
+                            list.push(data.IndexRecords[0].ClassRecords[i])
+                        }
+                    }
+                }
+                let construct = []
+                for(let i = 0; i < list.length; i++){
+                    construct.push({
+                        id: list[i].Id,
+                        type: list[i].type,
+                        name: this.toName(list[i].Caption) != null ? this.toName(list[i].Caption) : list[i].Caption,
+                        callsign: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 1 ? this.toCallsign(list[i].Caption)[1]: null) : null,
+                        class: this.toCallsign(list[i].Caption) != null ? (this.toCallsign(list[i].Caption)[0] == 2 ? this.toCallsign(list[i].Caption)[1] : null): null,
+                        passwdid: list[i].PasswdID
+                    })
+                }
+                resolve(construct)
+            }
+            catch(err){
+                reject(err)
+            }
+        })
+    }
     async message(data){
         return new Promise(async (resolve, reject) => {
             try {
@@ -468,10 +581,11 @@ class Parser {
                         class: this.toCallsign(data.Sender)[0] == 2 ? this.toCallsign(data.Sender)[1] : null
                     },
                     permissions: {
-                        forward: data.AllowForward,
-                        reply: data.AllowReply
+                        forward: data.AllowForward != undefined ? data.AllowForward : true, //In drafts this is missing, why?
+                        reply: data.AllowCollatedReply
                     },
-                    content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, ""))
+                    content: this.toUTF8(data.ContentHtml.replace(/(<(\/p|p)>)/g, "").replace(/(\\[a-z])/g, "")),
+                    id: data.Id
                 })
             }
             catch(err){
@@ -598,14 +712,12 @@ class Parser {
                 let authorName = null
                 let authorShort = null
                 let authorId = null
-                console.log("\n-\n", data)
                 if(authorData.includes("/teachers/")){ //Has link
                     authorId = authorData.split("/teachers/")[1].split('"')[0]
                     authorName = this.toReverse(this.toReverse(authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[1]).replace(")", ""))
                     authorShort = authorData.split('class="ope profile-link">')[1].split("</a>")[0].split(" (")[0]
                 }else {
                     if(!data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim().includes(" (")){ //Handle post by admin / other authority without a normal account
-                        console.log("By admin")
                         authorName = data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0].trim()
                     }else {
                         authorShort = this.removeEmptyLines(data.split('<span class="vismaicon vismaicon-sm vismaicon-user">')[1].split("<span>")[1].split("</span>")[0]).trim().split(" (")[0]
@@ -668,7 +780,7 @@ class Parser {
                         })
                     }
                     catch(err){
-                        console.log("Parsing error: ", err)
+                        console.log("OpenWilma response parsing error: ", err)
                     }
                 }   
                 let current = data.split('<div class="panel-body">')[3].replace(/( {1,}<)()()/g, "<").replace(/<div class="panel hidden-md-up">/g, "").split("</div>")
