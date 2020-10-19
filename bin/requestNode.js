@@ -1,6 +1,3 @@
-const { S_IFIFO } = require("constants")
-const { rmdirSync } = require("fs")
-
 // Http/Https request library for Node.Js
 class Request {
     constructor(){
