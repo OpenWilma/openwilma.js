@@ -450,17 +450,6 @@ class Parser {
             }
         })
     }
-    async draft(dataIn){
-        return new Promise(async (resolve, reject) => {
-            try {
-                let data = JSON.parse(dataIn)
-
-            }
-            catch(err){
-                reject(err)
-            }
-        })
-    }
     async draftRecipients(data){
         return new Promise(async (resolve, reject) => {
             try {
