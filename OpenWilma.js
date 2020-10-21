@@ -19,16 +19,9 @@ let memory = {
         secret: null,
         formkey: null
     },
-    cache: { //TODO: Implement caching with 30s intervals
-        messages: {
-            inbox: null,
-            drafts: null,
-            sent: null,
-            archive: null
-        },
+    cache: {
         servers: []
     }
-    //..etc (cache results)
 }
 
 // -- Classes --
@@ -635,7 +628,6 @@ class message extends messages { //Class for each message
                 reject(err)
             }
         })
-        //mid=
     }
     async forward(){
         //WIP
@@ -1193,7 +1185,7 @@ class OpenWilma {
         })
     }
     /**
-     * Logout from a Wilma server
+     * Logout from the Wilma server
      */
     async logout(){ //Logout from wilma. TODO: Does this work...?
         return new Promise(async (resolve, reject) => {
