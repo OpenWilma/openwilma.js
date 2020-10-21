@@ -7,7 +7,7 @@
 A Node.js and browser library for interacting with the Wilma API. <br>Use this simple and secure library to create your own Wilma enabled applications!
 #### (Library still in development, do not use in production)
 ### Supported platforms
-This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so exporting your code to the other supported platform is very simple. <br>(Just copy it)
+This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so using your code on the other supported platform is very simple. <br>(Just copy it)
 # Installation 
 ## Node.js
 This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
@@ -21,7 +21,7 @@ $ npm install OpenWilma/openwilma_js
 ```
 
 ## Browser
-Download this repository to your site. You can use this link:
+Download this repository to your site. You can use this link to download a zip archive. Don't forget to unarchive it:
 #### [Master.zip](https://github.com/OpenWilma/openwilma_js/archive/master.zip)
 
 # Quick Start
@@ -42,7 +42,7 @@ For browsers, do (make sure to correct the path, if needed):
 ```
 
 ## Step 2
-Make a new instance of OpenWilma.
+Make a new instance of OpenWilma. (Pro tip: By creating multiple instances you can have simultaneously open multiple instances of OpenWilma that are logged into different accounts at once.)
 <br>For Node.js, do:
 ```js
 const api = new OpenWilma()
@@ -106,9 +106,9 @@ For browsers (make sure to correct paths, if needed):
 ```
 
 ## Common errors
-- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" wilma server. It does not matter if your server is not "offically" supported, it may still work. You just need to bypass the server check by adding one more parameter to the .login() function. You need to add "false", which would look like this: 
+- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" Wilma servers. It does not matter if your server is not "offical", it may still work. You just need to bypass the server check by adding one more argument to the .login() function. You need to add "false", which would look like this: 
 ```js
-    //<OpenWilma> is known as "api" in this tutorial
+    //Pro tip: <OpenWilma> is known as "api" in the quick start
     <OpenWilma>.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password", false)
 ```
 - ```OpenWilma parsing error: <error>```, This error is logged into the console and reports an error in OpenWilma's parser. If you encounter this error, please make a [new issue](https://github.com/OpenWilma/openwilma_js/issues/new) on this Github repository with the **whole** logged message, so it can be resolved. (This issue is hardcoded and only occures when the given data format is not supported or something has changed in Wilma's api)
