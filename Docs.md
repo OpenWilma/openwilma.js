@@ -98,6 +98,12 @@ OpenWilma configuration object, which includes the OpenWilma client configuratio
 OpenWilma session object
 
 **Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The Wilma session id |
+
 
 ---
 # End

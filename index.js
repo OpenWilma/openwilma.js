@@ -23,6 +23,7 @@ const internal = {
 /**
  * OpenWilma session object
  * @typedef {{id: String}} OpenWilmaSession
+ * @property {String} id The Wilma session id
  */
 // -----------------------------------------------------
 /**
