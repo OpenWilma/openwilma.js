@@ -10,7 +10,7 @@ A Node.js and browser library for interacting with the Wilma API. <br>Use this s
 This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so using your code on the other supported platform is very simple. <br>(Just copy it)
 
 # Documentation
-Read the docs at **[./Docs.md](https://github.com/OpenWilma/openwilma_js/blob/1.0/docs.md)**
+Read the docs at **[./Docs.md](https://github.com/OpenWilma/openwilma_js/blob/1.0/Docs.md)**
 
 # Installation 
 ## Node.js
