@@ -107,4 +107,4 @@ OpenWilma session object
 
 ---
 # End
-These docs where generated with the ```buildDocs.js``` and can be easily regenerated with ```npm run build``` if there have been any changes to the Source Code
+These docs where generated with the ```buildDocs.js``` and can be easily regenerated with ```npm run build``` if there have been any changes to the Source Code.
