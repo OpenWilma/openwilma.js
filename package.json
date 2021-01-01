@@ -2,6 +2,12 @@
   "name": "openwilma",
   "version": "1.0.0",
   "description": "JavaScript Library for OpenWilma",
-  "main": "OpenWilma.js",
-  "license": "GPL-2.0"
+  "main": "index.js",
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "jsdoc-to-markdown": "^6.0.1"
+  },
+  "scripts": {
+    "build": "node buildDocs.js"
+  }
 }
