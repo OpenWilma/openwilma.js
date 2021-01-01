@@ -28,7 +28,7 @@
 
 
 # Documentation
-Defenitions for each item. *see Table of contents*<br>
+Defenitions for each item (*see Table of contents*).<br>
 
 ---
 ## OpenWilma
