@@ -1056,7 +1056,7 @@ class OpenWilma {
                     throw new Error(err)
                 })
             }
-        }, 14000)
+        }, 500)
     }
     /**
      * Login to a secondary account that the logged in account has permission to control
