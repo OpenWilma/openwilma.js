@@ -37,7 +37,7 @@ class messages { //Messages class
      * @param  {string} content Contents of the message
      * @param  {bool} showRecipients Show recipients to the message reciever
      * @param  {bool} CollatedReplies Allow collated replies
-     * @returns {message} Message
+     * @returns {Promise<message>} Message
      */
     async create(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
@@ -142,7 +142,7 @@ class messages { //Messages class
     /**
      * Gets a message by its id
      * @param {string} id Id of the message
-     * @returns {message}
+     * @returns {Promise<message>}
      */
     async get(id){
         return new Promise(async (resolve, reject) => {
@@ -187,7 +187,7 @@ class messages { //Messages class
     /**
      * Gets all messages from given category. Categories: archive, drafts, outbox, inbox
      * @param {Category!} Category One of: archive, drafts, outbox, inbox
-     * @returns {Message[]} Array of messages
+     * @returns {Promise<message[]>} Array of messages
      */
     async getAll(category){
         return new Promise(async (resolve, reject) => {
@@ -226,7 +226,7 @@ class messages { //Messages class
      * <h4 style="background:#ff00001a;padding:12px;border-radius:6px; ">
     * <b>Note: This does not return all recipients</b>
     * </h4>
-     * @returns {Promise[]} Array of recipients
+     * @returns {Promise<Array>} Array of recipients
      */
     async getRecipients(){
         return new Promise(async (resolve, reject) => {
@@ -262,7 +262,7 @@ class messages { //Messages class
      * @param  {string} content Contents of the message
      * @param  {bool} showRecipients Show recipients to the message reciever
      * @param  {bool} CollatedReplies Allow collated replies
-     * @returns {message} Message
+     * @returns {Promise<message>} Message
      */
     async send(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
@@ -797,7 +797,16 @@ class message extends messages { //Class for each message
         })
     }
 }
+
+/**
+ * @class
+ */
 class schedule { //Schedule class
+    /**
+     * Gets the schedule for the date
+     * @param {string} date Expects date like: 17.2.2025, 22.09.2012
+     * @returns {object} Object with data and periods
+     */
     async get(date){
         return new Promise(async (resolve, reject) => {
             try {
@@ -825,6 +834,10 @@ class schedule { //Schedule class
             }
         })
     }
+    /**
+     * Gets the current schedule
+     * @returns {object} Object with data and periods
+     */
     async getCurrent(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -1022,7 +1035,6 @@ class catalog { //Catalog class
 }
 
    /**
-       * Schools
        * @class
        */
 class schools {
@@ -1198,7 +1210,9 @@ class OpenWilma {
 
 
         /**
-         * Schools
+         * @type {Object}
+         * @readonly
+         * {@link schools}
          */
         this.schools = new schools()
         //TODO: Events?
