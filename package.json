@@ -9,6 +9,6 @@
     "minami": "^1.2.3"
   },
   "scripts": {
-    "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --readme README.md --verbose OpenWilma.js"
+    "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose OpenWilma.js"
   }
 }
