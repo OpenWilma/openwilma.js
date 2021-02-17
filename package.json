@@ -3,5 +3,12 @@
   "version": "1.0.0",
   "description": "JavaScript Library for OpenWilma",
   "main": "OpenWilma.js",
-  "license": "GPL-2.0"
+  "license": "GPL-2.0",
+  "devDependencies": {
+    "jsdoc": "^3.6.6",
+    "minami": "^1.2.3"
+  },
+  "scripts": {
+    "generate-docs": "node_modules/.bin/jsdoc --configure .jsdoc.json --verbose OpenWilma.js"
+  }
 }
