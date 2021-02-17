@@ -8,11 +8,11 @@ A Node.js and browser library for interacting with the Wilma API. <br>Use this s
 #### (Library still in development, do not use in production)
 ### Supported platforms
 This library has support for **Browser and Node.Js** platforms. Both platforms run the **same module**, so using your code on the other supported platform is very simple. <br>(Just copy it)
-# Installation 
+# Installation
 ## Node.js
 This Node.js module is not yet available through the npm registry, since it is still heavily in developement and not stable.
 
-Before installing, download and install Node.js. 
+Before installing, download and install Node.js.
 
 Installation is done using the npm install command, which in our case pulls the module from GitHub:
 
@@ -106,7 +106,7 @@ For browsers (make sure to correct paths, if needed):
 ```
 
 ## Common errors
-- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" Wilma servers. It does not matter if your server is not "offical", it may still work. You just need to bypass the server check by adding one more argument to the .login() function. You need to add "false", which would look like this: 
+- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" Wilma servers. It does not matter if your server is not "offical", it may still work. You just need to bypass the server check by adding one more argument to the .login() function. You need to add "false", which would look like this:
 ```js
     //Pro tip: <OpenWilma> is known as "api" in the quick start
     <OpenWilma>.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password", false)
@@ -122,8 +122,10 @@ Next you can check `test.js` or `test.html` for the latest working examples/test
 Wilma API wiki: (To be created)
 <br>Wilma API response parsing guidelines: [Parsing](https://github.com/OpenWilma/parsing)
 
-# Development 
+# Development
 To see what is being worked on, take a look in the pull requests and branches of this repo. Please feel free to join our [Discord server](https://discord.gg/husTxHa).
+<br>
+To build documentation you need to `npm install` first then `npm run generate-docs`
 <br>
  ##### The Esinko branch: [Esinko-Branch](https://github.com/OpenWilma/openwilma_js/tree/Esinko)
 # License
