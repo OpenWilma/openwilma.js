@@ -10,7 +10,7 @@ session._getList().then(async res => { //FOR TESTING ONLY, NOT REQUIRED
     session.login(server, user, password, false).then(async res => {
         console.log("Logged in!")
 
-        session.news.list().then(a => console.log(a))
+        session.printouts.getAll().then(a => console.log(a))
         //Tests for messages redacted for privacy reasons
     }).catch(async err => {
         console.log(err)

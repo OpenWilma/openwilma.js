@@ -871,7 +871,27 @@ class attendence { //Attendence class
 class attendenceSingle {
     //Actions per attendence note, no idea what goes here tho
 }
+
+
+/**
+ * @typedef Printout
+ * @property {string} id
+ * @property {string} url
+ * @example
+ *  {
+ *    id: 22,
+ *    url: "/trays/printable"
+ *  }
+ *
+ */
+
+/**
+ * @class
+ */
 class printouts { //Printouts class
+    /**
+     * @returns {Promise<Printout[]>} Array of printouts
+     */
     async getAll(){
         return new Promise(async (resolve, reject) => {
             try {
