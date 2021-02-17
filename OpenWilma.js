@@ -1183,6 +1183,18 @@ class forms { //Forms class
 // Main class
 /**
  * Main class for everything
+ *
+ * @example
+ *const OpenWilma = require('openwilma');
+ *const api = new OpenWilma()
+ *
+ *api.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password").then(async result => {
+ *   //You are logged in!
+ *
+ *  api.messages.getAll().then(messages => console.log(messages))
+ *}).catch(async error => {
+  *      console.log("Something went wrong: ", err)
+  *})
  */
 class OpenWilma {
     /**
@@ -1193,26 +1205,36 @@ class OpenWilma {
         // Options
         this.options = options
         // Classes
+        /**
+        * @property {messages} messages
+        */
         this.messages = new messages()
+        /**
+         * @property {schedule} schedule
+         */
         this.schedule = new schedule()
         this.choices = new choices()
         this.exams = new exams()
         this.attendence = new attendence()
+
+        /**
+        * @property {printouts} printouts
+        */
         this.printouts = new printouts()
         this.feedback = new feedback()
         this.enrollment = new enrollment()
         this.trays = new trays()
+
+        /**
+        * @property {news} news
+        */
         this.news = new news()
         this.catalog = new catalog()
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
-
-
         /**
-         * @type {Object}
-         * @readonly
-         * {@link schools}
+         * @property {schools} schools
          */
         this.schools = new schools()
         //TODO: Events?
@@ -1397,6 +1419,9 @@ class OpenWilma {
     }
     /**
      * Logout from the Wilma server
+     * <h4 style="background:#ff00001a;padding:12px;border-radius:6px; ">
+      * <b>Note: Not sure if this works</b>
+     * </h4>
      */
     async logout(){ //Logout from wilma. TODO: Does this work...?
         return new Promise(async (resolve, reject) => {
