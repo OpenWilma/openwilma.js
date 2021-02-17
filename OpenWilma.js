@@ -25,11 +25,24 @@ let memory = {
 }
 
 // -- Classes --
+/**
+ * Messages
+ * @class
+ */
 class messages { //Messages class
+    /**
+     * Creates a message and makes it a draft
+     * @param  {string} title Title of the message
+     * @param  {array} recipients Recipients in array
+     * @param  {string} content Contents of the message
+     * @param  {bool} showRecipients Show recipients to the message reciever
+     * @param  {bool} CollatedReplies Allow collated replies
+     * @returns {message} Message
+     */
     async create(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
             try {
-                //Get recipients 
+                //Get recipients
                 this.getRecipients().then(async list => {
                     //Make sure the recipients are valid
                     let validated = true
@@ -109,7 +122,7 @@ class messages { //Messages class
                                 })
                             }else {
                                 reject("Something went wrong while sending the message.")
-                            }  
+                            }
                         }).catch(async err => {
                             reject(err)
                         })
@@ -124,6 +137,13 @@ class messages { //Messages class
             }
         })
     }
+
+
+    /**
+     * Gets a message by its id
+     * @param {string} id Id of the message
+     * @returns {message}
+     */
     async get(id){
         return new Promise(async (resolve, reject) => {
             try {
@@ -156,6 +176,19 @@ class messages { //Messages class
             }
         })
     }
+
+      /**
+       * Categories archive, drafts, outbox, inbox
+     * @typedef Category
+     * @property {string!} Category One of: archive, drafts, outbox, inbox
+     */
+
+
+    /**
+     * Gets all messages from given category. Categories: archive, drafts, outbox, inbox
+     * @param {Category!} Category One of: archive, drafts, outbox, inbox
+     * @returns {Message[]} Array of messages
+     */
     async getAll(category){
         return new Promise(async (resolve, reject) => {
             try {
@@ -187,10 +220,18 @@ class messages { //Messages class
             }
         })
     }
+
+    /**
+     * Gets all recipients
+     * <h4 style="background:#ff00001a;padding:12px;border-radius:6px; ">
+    * <b>Note: This does not return all recipients</b>
+    * </h4>
+     * @returns {Promise[]} Array of recipients
+     */
     async getRecipients(){
         return new Promise(async (resolve, reject) => {
             try {
-                //Get recipients 
+                //Get recipients
                 //I am aware that there are more recipients that what this request gives us. But due to the limits of the testing accounts available these will have to do.
                 request.get({
                     url: memory.session.server + "/messages/recipients/?select_recipients&format=json",
@@ -198,7 +239,7 @@ class messages { //Messages class
                         Cookie: "Wilma2SID=" + memory.session.token
                     }
                 }).then(async res => {
-                    //console.log(res[1].body)
+                    console.log(res)
                     parser.messageRecipients(res[1].body).then(async res => {
                         resolve(res)
                     }).catch(async err => {
@@ -213,10 +254,20 @@ class messages { //Messages class
             }
         })
     }
+
+    /**
+     * Creates a message and sends it.
+     * @param  {string} title Title of the message
+     * @param  {array} recipients Recipients in array
+     * @param  {string} content Contents of the message
+     * @param  {bool} showRecipients Show recipients to the message reciever
+     * @param  {bool} CollatedReplies Allow collated replies
+     * @returns {message} Message
+     */
     async send(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
             try {
-                //Get recipients 
+                //Get recipients
                 this.getRecipients().then(async list => {
                     //Make sure the recipients are valid
                     let validated = true
@@ -296,7 +347,7 @@ class messages { //Messages class
                                 })
                             }else {
                                 reject("Something went wrong while sending the message.")
-                            }  
+                            }
                         }).catch(async err => {
                             reject(err)
                         })
@@ -312,12 +363,24 @@ class messages { //Messages class
         })
     }
 }
+
+/**
+ * Message
+ * @class
+
+ */
 class message extends messages { //Class for each message
     constructor(){
         super()
         //Then disable some stuff
         this.create = undefined
     }
+
+
+    /**
+     * Archives the message.
+     * @returns {boolean} Boolean
+     */
     async archive(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -349,6 +412,10 @@ class message extends messages { //Class for each message
             }
         })
     }
+    /**
+     * unArchives the message.
+     * @returns {boolean} Boolean
+     */
     async unArchive(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -374,12 +441,16 @@ class message extends messages { //Class for each message
                 }else {
                     reject("Cannot unarchive a message that is not in the archive")
                 }
-            }   
+            }
             catch(err){
                 reject(err)
             }
         })
     }
+    /**
+     * Deletes the message.
+     * @returns {boolean} Boolean
+     */
     async delete(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -401,18 +472,28 @@ class message extends messages { //Class for each message
                 }).catch(async err => {
                     reject(err)
                 })
-            }   
+            }
             catch(err){
                 reject(err)
             }
         })
     }
+
+    /**
+     * Edits the message
+     * @param  {string} newtitle
+     * @param  {array} newrecipients
+     * @param  {string} newcontent
+     * @param  {boolean} showRecipients
+     * @param  {boolean} CollatedReplies
+     * @returns {Message} The edited message
+     */
     async edit(newtitle, newrecipients, newcontent, showRecipients, CollatedReplies){
         return new Promise(async (resolve, reject) => {
             try {
                 if(this.folder == "drafts"){
                     if(newrecipients != null){
-                        //Get recipients 
+                        //Get recipients
                         this.getRecipients().then(async list => {
                             //Make sure the recipients are valid
                             let validated = true
@@ -551,7 +632,7 @@ class message extends messages { //Class for each message
                             })
                         }).catch(async err => {
                             reject(err)
-                        })  
+                        })
                     }
                 }else {
                     reject("Cannot edit a message that is not the drafts folder.")
@@ -562,6 +643,10 @@ class message extends messages { //Class for each message
             }
         })
     }
+    /**
+     * Sends a draft.
+     * @returns {boolean} Boolean
+     */
     async sendDraft(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -604,7 +689,7 @@ class message extends messages { //Class for each message
                                             resolve(message)
                                         }).catch(async err => {
                                             reject(err)
-                                        })   
+                                        })
                                     }else {
                                         reject("Failed to send the message")
                                     }
@@ -619,7 +704,7 @@ class message extends messages { //Class for each message
                         })
                     }).catch(async err => {
                         reject(err)
-                    })  
+                    })
                 }else {
                     reject("Cannot send a message that is not in the drafts folder.")
                 }
@@ -632,6 +717,12 @@ class message extends messages { //Class for each message
     async forward(){
         //WIP
     }
+    /**
+     * @param  {string} content
+     * @param  {boolean} showRecipients
+     * @param  {boolean} CollatedReplies
+     * @returns {boolean}
+     */
     async reply(content, showRecipients, CollatedReplies){
         return new Promise(async (resolve, reject) => {
             try {
@@ -669,6 +760,11 @@ class message extends messages { //Class for each message
             }
         })
     }
+
+    /**
+     * Recalls message
+     * @returns {boolean}
+     */
     async recall(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -694,7 +790,7 @@ class message extends messages { //Class for each message
                 }else {
                     reject("Cannot recall a message that is not in the sent folder")
                 }
-            }   
+            }
             catch(err){
                 reject(err)
             }
@@ -716,17 +812,17 @@ class schedule { //Schedule class
                             resolve(json)
                         }).catch(async err => {
                             reject(err)
-                        }) 
+                        })
                     }).catch(async err => {
                         reject(err)
-                    })  
+                    })
                 }else {
                     reject("Invalid date format")
                 }
             }
             catch(err){
                 reject(err)
-            }   
+            }
         })
     }
     async getCurrent(){
@@ -742,14 +838,14 @@ class schedule { //Schedule class
                         resolve(json)
                     }).catch(async err => {
                         reject(err)
-                    }) 
+                    })
                 }).catch(async err => {
                     reject(err)
-                })  
+                })
             }
             catch(err){
                 reject(err)
-            }   
+            }
         })
     }
 }
@@ -758,7 +854,7 @@ class choices {
 }
 class exams { //Exams class
     async get(id){
-        
+
     }
     async getAll(){
 
@@ -814,7 +910,7 @@ class trays { //Trays class
 
     }
     async set(period, position, boolean){
-        
+
     }
 }
 class news { //News class
@@ -870,7 +966,35 @@ class catalog { //Catalog class
 
     }
 }
+
+   /**
+       * Schools
+       * @class
+       */
 class schools {
+      /**
+     * @typedef School
+     * @property {string} name Name of the school
+     * @property {string} id Id of the school
+     * @property {object} object Object of additional features. This can include: suomiFiMessages savedSearches attendaceSummary
+     * @example
+     *  {
+     *    id: 8,
+     *    name: "Lähiölän lukio",
+     *    additionalFeatures: {
+     *      attendanceSummary: false,
+     *      savedSearches: true,
+     *      suomiFiMessages: false
+     *    }
+     *  }
+     *
+     */
+
+    /**
+     * Lists all schools
+    * @returns {Promise<School[]>} Array of {@link School}(s)
+     * @see School
+     */
     async getAll(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -885,19 +1009,25 @@ class schools {
                             resolve(schoolsArray)
                         }).catch(async err => {
                             reject(err)
-                        }) 
+                        })
                     }).catch(async err => {
                         reject(err)
-                    }) 
+                    })
                 }).catch(async err => {
                     reject(err)
-                })  
+                })
             }
             catch(err){
                 reject(err)
-            }   
+            }
         })
     }
+
+    /**
+     * @param {String} id Id of the school. You can get the id from {@link getAll}
+     * @returns {School} {@link School}
+     * @see School
+     */
     async get(id){
         return new Promise(async (resolve, reject) => {
             try {
@@ -927,23 +1057,23 @@ class schools {
                                                     construct.push(res[i])
                                                 }).catch(async err => {
                                                     reject(err)
-                                                }) 
+                                                })
                                             }).catch(async err => {
                                                 reject(err)
-                                            })  
+                                            })
                                         }
                                         catch(err){
                                             reject(err)
-                                        }   
-                                    }   
+                                        }
+                                    }
                                     resolve(construct)
                                 }
                             }).catch(async err => {
                                 reject(err)
-                            }) 
+                            })
                         }).catch(async err => {
                             reject(err)
-                        }) 
+                        })
                     }).catch(async err => {
                         reject(err)
                     })
@@ -985,7 +1115,14 @@ class forms { //Forms class
     }
 }
 // Main class
+/**
+ * Main class for everything
+ */
 class OpenWilma {
+    /**
+     *
+     * @param {WilmaOptions} options Options for wilma
+     */
     constructor(options){
         // Options
         this.options = options
@@ -1004,6 +1141,11 @@ class OpenWilma {
         this.profile = new profile()
         this.strategy = new strategy()
         this.forms = new forms()
+
+
+        /**
+         * Schools
+         */
         this.schools = new schools()
         //TODO: Events?
     }
@@ -1021,7 +1163,7 @@ class OpenWilma {
                         parser.format(result[1].body).then(async data => {
                             memory.cache.servers = data.wilmat
                             memory.session.lastRequest = new Date().getTime()
-                            resolve([null, data.wilmat])  
+                            resolve([null, data.wilmat])
                         }).catch(async err => {
                             reject([err, result])
                         })
@@ -1039,6 +1181,7 @@ class OpenWilma {
     }
     /**
      * Refresh the session if it's not being upkept with normal requests
+     * @protected
      */
     async _refreshSession(){
         if(this.refreshLoop != null) this.refreshLoop = null
@@ -1060,14 +1203,14 @@ class OpenWilma {
     }
     /**
      * Login to a secondary account that the logged in account has permission to control
-     * @param {*} id 
+     * @param {*} id
      */
     async setUser(id){
 
     }
     /**
      * Login to a Wilma server
-     * @param {String} server The Wilma server
+     * @param {String} server The Wilma server url
      * @param {String} username The username of the Wilma account
      * @param {String} password The password of the Wilma account
      * @param {Boolean} validateServer If the server should be validated or not
@@ -1157,7 +1300,7 @@ class OpenWilma {
                                                                     reject(err)
                                                                 })
                                                             }
-                                                        }   
+                                                        }
                                                     }
                                                 }).catch(async err1 => {
                                                     reject(err1)
@@ -1176,7 +1319,7 @@ class OpenWilma {
                                 reject(err)
                             })
                         }
-                    }   
+                    }
                 })
             }
             catch(err){
@@ -1210,7 +1353,7 @@ class OpenWilma {
             }
             catch(err){
                 reject(err)
-            }   
+            }
         })
     }
 }
