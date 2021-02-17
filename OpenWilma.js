@@ -913,7 +913,35 @@ class trays { //Trays class
 
     }
 }
+
+/**
+ * @typedef NewsItem
+ * @property {string} id
+ * @property {object} author
+ * @property {string} description
+ * @property {date} date Example: 21.10.2020
+ * @property {number} type
+ * @property {string} title
+ * @example
+ *  {
+ *    id: 8,
+ *    author: "Datanomi",
+ *    description: null,
+ *    date: "22.11.2025",
+ *    type: 0,
+ *    title: "Datanomi > Lukiolainen"
+ *  }
+ *
+ */
+
+/**
+ * News
+ * @class
+ */
 class news { //News class
+    /**
+     * @returns {Promise<NewsItem[]>} Array of news
+     */
     async list(){
         return new Promise(async (resolve, reject) => {
             try {
@@ -937,6 +965,12 @@ class news { //News class
             }
         })
     }
+
+
+    /**
+     * @param {string} id
+     * @returns {Promise<NewsItem>}
+     */
     async get(id){
         return new Promise(async (resolve, reject) => {
             try {
