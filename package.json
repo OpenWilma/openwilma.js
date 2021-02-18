@@ -27,6 +27,8 @@
     "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib"
   },
   "dependencies": {
-    "axios": "^0.21.1"
+    "@lopatnov/rollup-plugin-uglify": "^2.1.0",
+    "axios": "^0.21.1",
+    "terser": "^5.6.0"
   }
 }
