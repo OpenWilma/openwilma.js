@@ -1,27 +1,15 @@
-import {WilmaSession} from "./types/WilmaSession"
-
 /**
- * The Wilma account configuration
- * @param {String} username The account username
- * @param {String} password The account password
- * @param {String} server The Wilma server as a string.
- */
-interface WilmaAccountConfiguration {
-	username: String,
-	password: String
-	server: String
-}
-
-/**
- * 
+ *
  * This is the Javascript version of the OpenWilma project.
- * 
+ *
  * Author: OpenWilma.Js contributors (see github repository contributors list).
- * 
+ *
  * Website: https://openwilma.testausserveri.fi
- * 
+ *
  * Github: https://github.com/OpenWilma/openwilma_js/
  */
+import WilmaAccountConfiguration, {WilmaSession} from "./types";
+
 class OpenWilmaCore {
 	/**
 	 * Login to a new Wilma account
