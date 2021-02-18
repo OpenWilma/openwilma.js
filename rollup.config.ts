@@ -30,7 +30,7 @@ export default [
     ]
   },
   {
-    input: `src/${pkg.libraryFile}.ts`,
+    input: `lib/${pkg.libraryFile}.ts`,
     output: {
       file: `dist/${pkg.libraryFile}.min.js`,
       name: pkg.umdName,
