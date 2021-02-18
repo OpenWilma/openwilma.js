@@ -8,7 +8,8 @@
  *
  * Github: https://github.com/OpenWilma/openwilma_js/
  */
-import WilmaAccountConfiguration, {WilmaSession} from "./types";
+import WilmaAccountConfiguration from "./types";
+import  {WilmaSession} from "./types/WilmaSession"
 
 class OpenWilmaCore {
 	/**
