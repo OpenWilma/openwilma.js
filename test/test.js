@@ -1,0 +1,1 @@
+// Module testing, CommonJS
