@@ -7,7 +7,7 @@ import pkg from "./package.json";
 
 export default [
   {
-    input: `src/${pkg.libraryFile}.ts`,
+    input: `lib/${pkg.libraryFile}.ts`,
     output: [
       {
         file: pkg.main,
