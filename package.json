@@ -8,6 +8,7 @@
   "main": "dist/index.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
+  "typings": "lib/index.d.ts",
   "devDependencies": {
     "eslint": "^7.20.0",
     "@types/typescript": "^2.0.0",

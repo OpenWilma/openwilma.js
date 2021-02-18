@@ -1,14 +1,15 @@
 /**
- * 
+ *
  * This is the Javascript version of the OpenWilma project.
- * 
+ *
  * Author: OpenWilma.Js contributors (see github repository contributors list).
- * 
+ *
  * Website: https://openwilma.testausserveri.fi
- * 
+ *
  * Github: https://github.com/OpenWilma/openwilma_js/
  */
-import WilmaAccountConfiguration from "./index"
+import WilmaAccountConfiguration, {WilmaSession} from "./types";
+
 class OpenWilmaCore {
 	
 	/**
@@ -21,6 +22,7 @@ class OpenWilmaCore {
 }
 
 class WilmaAccountInstance {
+	session: WilmaSession
 	constructor(session_id: string, secret: string, formkey: string, slug: string){
 		this.session = {
 			id: session_id,

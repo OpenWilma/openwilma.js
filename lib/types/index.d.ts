@@ -9,7 +9,7 @@
  * @param {String} secret Account secret
  * @param {String} slug Possible user slug (for multi-user accounts)
  */
-interface WilmaSession {
+export interface WilmaSession {
     id: String,
     formkey: String,
     secret: String,
