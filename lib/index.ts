@@ -42,7 +42,10 @@ class WilmaAccountInstance {
 	}
 }
 
+// Import starsoft servers list api client
+import {listServers} from "./starsoft/servers"
+
 module.exports = {
 	client: OpenWilmaCore,
-	listServers: require("./starsoft/servers.ts")
+	listServers: listServers
 }

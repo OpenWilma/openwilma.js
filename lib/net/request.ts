@@ -6,8 +6,6 @@ const axios = require("axios")
 
 // Typings
 
-import {WilmaSession} from "../types/WilmaSession"
-
 type RequestHeader = {
     name: string,
     value: string,
