@@ -1,3 +1,17 @@
+import {WilmaSession} from "./types/WilmaSession"
+
+/**
+ * The Wilma account configuration
+ * @param {String} username The account username
+ * @param {String} password The account password
+ * @param {String} server The Wilma server as a string.
+ */
+interface WilmaAccountConfiguration {
+	username: String,
+	password: String
+	server: String
+}
+
 /**
  * 
  * This is the Javascript version of the OpenWilma project.
@@ -8,19 +22,20 @@
  * 
  * Github: https://github.com/OpenWilma/openwilma_js/
  */
-import WilmaAccountConfiguration from "./index"
 class OpenWilmaCore {
-	
 	/**
 	 * Login to a new Wilma account
 	 * @param {WilmaAccountConfiguration} account The Wilma account configuration.
 	 */
 	async login(account: WilmaAccountConfiguration) : Promise<WilmaAccountInstance> {
-		return {}
+		return new WilmaAccountInstance("", "", "", "")
 	}
 }
-
+/**
+ * Wilma account instance
+ */
 class WilmaAccountInstance {
+	session: WilmaSession
 	constructor(session_id: string, secret: string, formkey: string, slug: string){
 		this.session = {
 			id: session_id,
@@ -31,7 +46,10 @@ class WilmaAccountInstance {
 	}
 }
 
+// Import starsoft api server list script
+import {listServers} from "./starsoft/servers"
+
 module.exports = {
 	client: OpenWilmaCore,
-	listServers: require("./starsoft/servers.ts")
+	listServers: listServers
 }

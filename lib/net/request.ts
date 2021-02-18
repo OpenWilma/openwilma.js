@@ -4,6 +4,8 @@ const axios = require("axios")
 
 // Typings
 
+import {WilmaSession} from "../types/WilmaSession"
+
 type RequestHeader = {
     name: string,
     value: string,
@@ -12,9 +14,9 @@ type RequestHeader = {
 
 interface RequestOptions {
     url: string,
-    headers: Array<RequestHeader>,
-    body: string|any,
-    timeout: number
+    headers?: Array<RequestHeader>,
+    body?: string|any,
+    timeout?: number
 }
 
 interface RequestResponse {
@@ -29,7 +31,7 @@ interface RequestResponse {
  * Perform a http(s) request
  * @param config 
  */
-async function request(method: string, session: WilmaSession, options: RequestOptions): Promise<RequestResponse> {
+export async function request(method: string, session: WilmaSession|null, options: RequestOptions): Promise<RequestResponse> {
     // Verify inputs
     if(
         /[get]|[post]|[put]/g.test(method) &&
@@ -95,11 +97,13 @@ async function request(method: string, session: WilmaSession, options: RequestOp
         if(session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + session.id
 
         // Append credentials to application/json body by default
-        if(headers["Content-Type"].toLoweCase() == "application/json"){
+        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLoweCase() == "application/json"){
             if(options.body.format == undefined) options.body.format = "json"
             if(options.body.CompleteJson == undefined) options.body.CompleteJson = true
-            if(options.body.formkey == undefined) options.body.formkey = session.formkey
-            if(options.body.secret == undefined) options.body.secret = session.secret
+            if(session != null){
+                if(options.body.formkey == undefined) options.body.formkey = session.formkey
+                if(options.body.secret == undefined) options.body.secret = session.secret
+            }
         }
 
         // Perform request through axios
@@ -123,5 +127,3 @@ async function request(method: string, session: WilmaSession, options: RequestOp
         throw new Error("Invalid request arguments")
     }
 }
-
-module.exports = request

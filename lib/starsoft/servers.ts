@@ -1,5 +1,5 @@
-module.exports = async function listServers(){
-    let request = require("./net/request.ts")
+import {request} from "../net/request"
+export async function listServers(){
     try {
         let servers = await request("get", null, {
             url: "https://www.starsoft.fi/wilmat/wilmat.json"
