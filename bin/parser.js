@@ -1,3 +1,6 @@
+// Parser library
+const cheerio = require('cheerio');
+
 //Type conversions
 const role = {
     1: "Teacher",
@@ -811,6 +814,28 @@ class Parser {
                 reject(err)
             }
         })
+    }
+    roleSelectorExists(htmlData) {
+        return htmlData.includes("id=\"role-selection\"");
+    }
+    async parseRoles(htmlData) {
+        let roles = [];
+        let $html = cheerio.load(htmlData);
+        let roleLinks = $html("a.text-style-link");
+        console.log(roleLinks.length);
+        let c=0;
+        roleLinks.first();
+        while (c < roleLinks.length-1) {
+            let elem = roleLinks.next();
+            console.log(elem);
+            let roleName = elem.text();
+            let slug = roleLinks.toArray()[c].attribs.href;
+            let schoolName = elem.children("small").length;
+            let className = elem.children('.lem').length;
+            let teacherName = elem.children('.links.small.first.bothmargins').length;
+            console.log({roleName, slug, schoolName, className, teacherName})
+            c++;
+        }
     }
     async printout(data){
         return new Promise(async (resolve, reject) => {

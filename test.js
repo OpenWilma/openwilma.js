@@ -7,8 +7,15 @@ let password = process.argv[4]
 
 session._getList().then(async res => { //FOR TESTING ONLY, NOT REQUIRED
     console.log("Compatible runtime!")
-    session.login(server, user, password, false).then(async res => {
+    session.login(server, user, password, false).then(async roleRequired => {
         console.log("Logged in!")
+        if (roleRequired) {
+            console.log("role required!");
+            console.log("select: ");
+            session.getRoles().then(res => {
+
+            });
+        }
         //Tests for messages redacted for privacy reasons
     }).catch(async err => {
         console.log(err)

@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "description": "JavaScript Library for OpenWilma",
   "main": "OpenWilma.js",
-  "license": "GPL-2.0"
+  "license": "GPL-2.0",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5"
+  }
 }

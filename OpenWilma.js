@@ -14,6 +14,7 @@ let memory = {
         token: null,
         sessionId: null,
         server: null,
+        slug: null,
         serverName: "",
         lastRequest: null,
         secret: null,
@@ -213,6 +214,7 @@ class messages { //Messages class
             }
         })
     }
+
     async send(title, recipients, content, showRecipients, CollatedReplies){ //Recipe
         return new Promise(async (resolve, reject) => {
             try {
@@ -1065,15 +1067,25 @@ class OpenWilma {
     async setUser(id){
 
     }
+
+    /**
+     * Returns Server URL with slug, or without
+     * @returns {null|*}
+     */
+    getServerURLWithSlug() {
+        if (memory.session.slug)
+            return memory.session.server+memory.session.slug;
+        return memory.session.server;
+    }
+
     /**
      * Login to a Wilma server
      * @param {String} server The Wilma server
      * @param {String} username The username of the Wilma account
      * @param {String} password The password of the Wilma account
-     * @param {Boolean} validateServer If the server should be validated or not
-     * @returns Promise()
+     * @returns Promise(roleRequired)
      */
-    async login(server, username, password, validateServer){ //Login to wilma
+    async login(server, username, password){ //Login to wilma
         return new Promise(async (resolve, reject) => {
             try {
                 //Check URL format
@@ -1094,88 +1106,106 @@ class OpenWilma {
                                 break
                             }
                         }
-                        if(found == false && (validateServer != false || validateServer == undefined)){
+                        if (memory.session.server == null){
+                            // bypassing server validation
+                            memory.session.server = server;
+                            memory.session.serverName = 'Unknown Server';
+                        }
+                        // @dfJ: In my opinion, not best server validation, better to skip this check, and rely on index_json request. If it fails, invalid URL
+
+                        /*if(found == false && (validateServer != false || validateServer == undefined)){
                             reject("No such Wilma server available.")
-                        }else {
-                            if(validateServer == false && memory.session.server == null){
-                                // bypassing server validation
-                                memory.session.server = server;
-                                memory.session.serverName = 'Unknown Server';
-                            }
-                            request.get({
-                                url: server + "/index_json"
-                            }).then(async res1 => {
-                                if(res1[0] != null){
-                                    reject(res1[0])
-                                }else {
-                                    parser.format(res1[1].body).then(async data => {
-                                        if(config.supportedApiVersions.includes(data.ApiVersion.toString())){
-                                            if(data.SessionID != undefined){
-                                                memory.session.sessionId = data.SessionID
-                                                request.post({
-                                                    url: server + "/login",
-                                                    body: {
-                                                        Login: username,
-                                                        Password: password,
-                                                        SESSIONID: data.SessionID,
-                                                        CompleteJson: null,
-                                                        format: "Json"
-                                                    },
-                                                    headers: {
-                                                        "Content-Type": "application/x-www-form-urlencoded"
-                                                    },
-                                                    args: ["NoRedirects"]
-                                                }).then(async res2 => {
-                                                    if(res2[0] != null){
-                                                        reject(res2[0])
+                        } else {
+                        }*/
+                        request.get({
+                            url: server + "/index_json"
+                        }).then(async res1 => {
+                            if(res1[0] != null){
+                                reject(res1[0])
+                            }else {
+                                parser.format(res1[1].body).then(async data => {
+                                    if(config.supportedApiVersions.includes(data.ApiVersion.toString())){
+                                        if(data.SessionID != undefined){
+                                            memory.session.sessionId = data.SessionID
+                                            request.post({
+                                                url: server + "/login",
+                                                body: {
+                                                    Login: username,
+                                                    Password: password,
+                                                    SESSIONID: data.SessionID,
+                                                    CompleteJson: null,
+                                                    format: "Json"
+                                                },
+                                                headers: {
+                                                    "Content-Type": "application/x-www-form-urlencoded"
+                                                },
+                                                args: ["NoRedirects"]
+                                            }).then(async res2 => {
+                                                if(res2[0] != null){
+                                                    reject(res2[0])
+                                                }else {
+                                                    if(res2[1].error != undefined){
+                                                        reject(res2[1])
                                                     }else {
-                                                        if(res2[1].error != undefined){
-                                                            reject(res2[1])
+                                                        if(res2[1].cookies.Wilma2SID == undefined){
+                                                            reject("Invalid username or password")
                                                         }else {
-                                                            if(res2[1].cookies.Wilma2SID == undefined){
-                                                                reject("Invalid username or password")
-                                                            }else {
-                                                                memory.session.token = res2[1].cookies.Wilma2SID.value
+                                                            // Save session id
+                                                            memory.session.token = res2[1].cookies.Wilma2SID.value;
+                                                            // Check for roles
+                                                            request.get({
+                                                                url: this.getServerURLWithSlug()+"/?format=json",
+                                                                headers: {
+                                                                    "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                                                                }
+                                                            }).then(async res => {
+                                                                let roleRequired = parser.roleSelectorExists(res[1].body);
                                                                 //Get the secret and formkey
-                                                                request.get({
-                                                                    url: server + "/messages",
-                                                                    headers: {
-                                                                        "Cookie": "Wilma2SID=" + memory.session.token + ";"
-                                                                    }
-                                                                }).then(async res => {
-                                                                    parser.credentials(res[1].body).then(async ar => {
-                                                                        memory.session.secret = ar[0]
-                                                                        memory.session.formkey = ar[1]
-                                                                        //Done
-                                                                        memory.session.lastRequest = new Date().getTime()
-                                                                        this._refreshSession()
-                                                                        resolve()
+                                                                if (!roleRequired) {
+                                                                    request.get({
+                                                                        url: server + "/messages",
+                                                                        headers: {
+                                                                            "Cookie": "Wilma2SID=" + memory.session.token + ";"
+                                                                        }
+                                                                    }).then(async res => {
+                                                                        parser.credentials(res[1].body).then(async ar => {
+                                                                            memory.session.secret = ar[0]
+                                                                            memory.session.formkey = ar[1]
+                                                                            //Done
+                                                                            memory.session.lastRequest = new Date().getTime()
+                                                                            this._refreshSession()
+                                                                            resolve(roleRequired)
+                                                                        }).catch(async err => {
+                                                                            reject(err)
+                                                                        })
                                                                     }).catch(async err => {
                                                                         reject(err)
-                                                                    })
-                                                                }).catch(async err => {
-                                                                    reject(err)
-                                                                })
-                                                            }
-                                                        }   
+                                                                    });
+                                                                } else {
+                                                                    resolve(roleRequired);
+                                                                }
+                                                            }).catch(async err => {
+                                                                reject(err)
+                                                            });
+                                                        }
                                                     }
-                                                }).catch(async err1 => {
-                                                    reject(err1)
-                                                })
-                                            }else {
-                                                reject("SessionID missing from response body.")
-                                            }
+                                                }
+                                            }).catch(async err1 => {
+                                                reject(err1)
+                                            })
                                         }else {
-                                            reject("Unsupported ApiVersion: " + data.ApiVersion + ", supported: " + config.supportedApiVersions.join(", "))
+                                            reject("SessionID missing from response body.")
                                         }
-                                    }).catch(async err => {
-                                        reject("Unexpected parser error: " + err)
-                                    })
-                                }
-                            }).catch(async err => {
-                                reject(err)
-                            })
-                        }
+                                    }else {
+                                        reject("Unsupported ApiVersion: " + data.ApiVersion + ", supported: " + config.supportedApiVersions.join(", "))
+                                    }
+                                }).catch(async err => {
+                                    reject("Unexpected parser error: " + err)
+                                })
+                            }
+                        }).catch(async err => {
+                            reject(err)
+                        })
                     }   
                 })
             }
@@ -1184,6 +1214,31 @@ class OpenWilma {
             }
         })
     }
+
+    async getRoles() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                request.get({
+                    url: this.getServerURLWithSlug()+"/?format=json",
+                    headers: {
+                        "Cookie": "Wilma2SID=" + memory.session.token + ";",
+                    }
+                }).then(async res => {
+                    if(res[0] != null){
+                        reject(res[0]);
+                        return;
+                    }
+                    console.log("res!");
+                    parser.parseRoles(res[1].body).then();
+                }).catch(err => {
+                    reject(err);
+                })
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
     /**
      * Logout from the Wilma server
      */
