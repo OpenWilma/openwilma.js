@@ -962,7 +962,7 @@ class trays { //Trays class
  *    description: null,
  *    date: "22.11.2025",
  *    type: 0,
- *    title: "Datanomi > Lukiolainen"
+ *    title: "Datanomi < Lukiolainen"
  *  }
  *
  */
