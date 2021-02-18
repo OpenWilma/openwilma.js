@@ -20,7 +20,7 @@
     "typescript": "^3.9.7"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.ts"
+    "build": "mkdir dist && rollup -c rollup.config.ts"
   },
   "dependencies": {
     "axios": "^0.21.1"
