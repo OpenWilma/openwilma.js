@@ -1,10 +1,7 @@
 // Axios wrapper
 // TODO: Implement custom error type
-import {WilmaSession} from "../types";
-
-const axios = require("axios")
-
-// Typings
+import { WilmaSession } from "../types";
+import axios from 'axios';
 
 type RequestHeader = {
     name: string,
@@ -25,19 +22,36 @@ interface RequestResponse {
     headers: any
 }
 
-// Function
-
 /**
  * Perform a http(s) request
  * @param config 
  */
 export async function request(method: string, session: WilmaSession|null, options: RequestOptions): Promise<RequestResponse> {
-    // Verify inputs
+    if (!/[get]|[post]|[put]/g.test(method)) {
+      throw new Error('An unknown request method.');
+    }
+
+    if (typeof options === 'object') {
+      throw new Error('No options supplied.');
+    }
+
+    if (options.headers === undefined) {
+      options.headers = [];
+    }
+
+    const headers = {}
+
+    for (const header in options.headers) {
+      let header: RequestHeader = options.headers[i]
+    }
+
+
+
     if(
         /[get]|[post]|[put]/g.test(method) &&
         options != undefined &&
-        typeof options == "object" &&
-        options.body != undefined ? typeof options.body == "object" : true &&
+        typeof options === "object" &&
+        options.body != undefined ? typeof options.body === "object" : true &&
         options.headers != undefined ? Array.isArray(options.headers) : true
     ){ 
         // Make sure method is in lower case
@@ -45,7 +59,9 @@ export async function request(method: string, session: WilmaSession|null, option
 
         // Build headers
         if(options.headers == undefined) options.headers = []
+
         let headers: any = {}
+
         for(let i: number = 0; i < options.headers.length; i++){
             let header: RequestHeader = options.headers[i]
             // Verify header
@@ -63,7 +79,7 @@ export async function request(method: string, session: WilmaSession|null, option
         }
 
         // Request body formatting
-        if(headers["Content-Type"] == undefined){
+        if(headers["Content-Type"] === undefined){
             // This means we will use default of Application/json if we have a non-get request
             // Otherwise don't set the header
             if(method != "get"){
@@ -73,7 +89,6 @@ export async function request(method: string, session: WilmaSession|null, option
             // We have a custom header.
             switch(headers["Content-Type"].value.toLowerCase()){
             case "application/x-www-form-urlencoded":
-                // Encode the body
                 try {
                     let temp = ""
                     let keys = Object.keys(options.body)
@@ -107,15 +122,13 @@ export async function request(method: string, session: WilmaSession|null, option
         }
 
         // Perform request through axios
-        let req = axios({
+        const request = await axios({
             url: options.url,
             method: method,
             data: options.body,
             timeout: options.timeout == undefined ? 30000 : options.timeout
         })
-        req.catch((err: Error) => {
-            throw err
-        })
+
         return req.then((response: any) => {
             return {
                 data: response.data != undefined ? response.data : null,
