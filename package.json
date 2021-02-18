@@ -17,10 +17,13 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "jsdoc": "^3.6.6",
+    "minami": "^1.2.3"
   },
   "scripts": {
-    "build": "mkdir dist && rollup -c rollup.config.ts"
+    "build": "rollup -c rollup.config.ts",
+    "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib"
   },
   "dependencies": {
     "axios": "^0.21.1"
