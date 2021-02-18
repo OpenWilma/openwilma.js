@@ -1,5 +1,7 @@
 // Axios wrapper
 // TODO: Implement custom error type
+import {WilmaSession} from "../types";
+
 const axios = require("axios")
 
 // Typings

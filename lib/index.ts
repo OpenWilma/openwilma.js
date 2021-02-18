@@ -12,17 +12,17 @@ import WilmaAccountConfiguration from "./types";
 import  {WilmaSession} from "./types/WilmaSession"
 
 class OpenWilmaCore {
+	
 	/**
 	 * Login to a new Wilma account
 	 * @param {WilmaAccountConfiguration} account The Wilma account configuration.
 	 */
 	async login(account: WilmaAccountConfiguration) : Promise<WilmaAccountInstance> {
-		return new WilmaAccountInstance("", "", "", "")
+		return {}
 	}
+
 }
-/**
- * Wilma account instance
- */
+
 class WilmaAccountInstance {
 	session: WilmaSession
 	constructor(session_id: string, secret: string, formkey: string, slug: string){
@@ -35,10 +35,7 @@ class WilmaAccountInstance {
 	}
 }
 
-// Import starsoft api server list script
-import {listServers} from "./starsoft/servers"
-
 module.exports = {
 	client: OpenWilmaCore,
-	listServers: listServers
+	listServers: require("./starsoft/servers.ts")
 }

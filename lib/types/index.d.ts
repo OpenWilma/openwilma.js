@@ -1,6 +1,20 @@
 /* OpenWilmaCore typings */
 
-import {WilmaSession} from "./WilmaSession"
+// Accounts
+
+/**
+ * Wilma session object
+ * @param {String} id Session ID
+ * @param {String} formkey Form key for sending form data
+ * @param {String} secret Account secret
+ * @param {String} slug Possible user slug (for multi-user accounts)
+ */
+export interface WilmaSession {
+    id: String,
+    formkey: String,
+    secret: String,
+    slug: String
+}
 
 /**
  * The Wilma account configuration
