@@ -18,7 +18,14 @@ class OpenWilmaCore {
 	 * @param {WilmaAccountConfiguration} account The Wilma account configuration.
 	 */
 	async login(account: WilmaAccountConfiguration) : Promise<WilmaAccountInstance> {
-		return {}
+		return {
+			session: {
+				id: '',
+				formkey: '',
+				secret: '',
+				slug: null
+			}
+		}
 	}
 
 }

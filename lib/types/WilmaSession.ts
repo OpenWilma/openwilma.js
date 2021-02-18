@@ -6,8 +6,8 @@
  * @param {String} slug Possible user slug (for multi-user accounts)
  */
 export interface WilmaSession {
-    id: String|null,
-    formkey: String|null,
-    secret: String|null,
-    slug: String|null
+    id: string
+    formkey: string
+    secret: string
+    slug: string|null
 }
