@@ -1,32 +1,13 @@
 // Axios wrapper
-// TODO: Implement custom error type
-import {WilmaSession} from "../types";
-
 const axios = require("axios")
+// TODO: Implement custom error type
 
 // Typings
+import {WilmaSession} from "../types";
+import {RequestHeader, RequestOptions, RequestResponse} from "../types/apiRequest"
+import Errors from "../utils/error"
 
-type RequestHeader = {
-    name: string,
-    value: string
-}
-
-interface RequestOptions {
-    url: string,
-    headers?: Array<RequestHeader>,
-    body?: string|any,
-    timeout?: number,
-    session?: WilmaSession,
-    excludeEncoding?: string[] // Exclude these from the response data encoder
-}
-
-interface RequestResponse {
-    status: string,
-    data: any,
-    headers: any
-}
-
-// Function
+// Functions
 
 /**
  * Perform a http(s) request
@@ -52,15 +33,23 @@ export async function request(method: string, options: RequestOptions): Promise<
             let header: RequestHeader = options.headers[i]
             // Verify header
             if(header.name == undefined || header.value == undefined){
-                throw new Error("Invalid header at index " + i)
+                throw new Errors.APIRequestPreflightError("Invalid header at index " + i)
             }else {
                 // Valid header
                 if(headers[header.name] != undefined){
-                    throw new Error("Overwrote existing header with header at index " + i)
+                    throw new Errors.APIRequestPreflightError("Overwrote existing header with header at index " + i)
                 }else {
                     // Can write
                     headers[header.name] = header.value
                 }
+            }
+        }
+        // Get GET request responses as JSON
+        if(method == "get"){
+            if(options.url.includes("?")){
+                options.url = options.url + "&format=json" // This could be done better
+            }else {
+                options.url = options.url + "?format=json"
             }
         }
 
@@ -81,7 +70,6 @@ export async function request(method: string, options: RequestOptions): Promise<
                     let keys: string[] = Object.keys(options.body)
                     for(let i: number = 0; i < keys.length; i++){
                         if(temp != "") temp = temp + "&"
-                        // WTF is this error?
                         if(options.excludeEncoding != undefined && Array.isArray(options.excludeEncoding) && options.excludeEncoding.includes(keys[i])){
                             temp = temp + encodeURIComponent(keys[i]) + "=" + options.body[keys[i]]
                         }else {
@@ -92,7 +80,7 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
                 catch(err){
                     console.error(err) // Print this for now
-                    throw new Error("Failed to create request body according to format.")
+                    throw new Errors.APIRequestPreflightError("Failed to create request body according to format.")
                 }
                 break
             default:
@@ -121,7 +109,7 @@ export async function request(method: string, options: RequestOptions): Promise<
             timeout: options.timeout == undefined ? 30000 : options.timeout
         })
         req.catch((err: Error) => {
-            throw err
+            throw new Errors.APIRequestPostflightError(err)
         })
         return req.then((response: any) => {
             return {
@@ -131,7 +119,7 @@ export async function request(method: string, options: RequestOptions): Promise<
             }
         })
     }else {
-        throw new Error("Invalid request arguments")
+        throw new Errors.APIRequestError("Invalid request arguments")
     }
 }
 
