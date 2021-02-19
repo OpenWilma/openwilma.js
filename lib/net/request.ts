@@ -140,7 +140,7 @@ export default {
         return request("get", options)
     },
     post: async function(options: RequestOptions){
-        return request("get", options)
+        return request("post", options)
     },
     put: async function(options: RequestOptions){
         return request("put", options)
