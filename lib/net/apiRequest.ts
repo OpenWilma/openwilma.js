@@ -3,7 +3,6 @@ const axios = require("axios")
 // TODO: Implement custom error type
 
 // Typings
-import {WilmaSession} from "../types";
 import {RequestHeader, RequestOptions, RequestResponse} from "../types/apiRequest"
 import Errors from "../utils/error"
 
