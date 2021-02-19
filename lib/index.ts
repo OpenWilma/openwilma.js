@@ -16,8 +16,10 @@ class OpenWilmaCore {
 	/**
 	 * Login to a new Wilma account
 	 * @param {WilmaAccountConfiguration} account The Wilma account configuration.
+	 * @param {boolean} validateServer Validate the provider Wilma server
 	 */
-	async login(account: WilmaAccountConfiguration) : Promise<WilmaAccountInstance> {
+	async login(account: WilmaAccountConfiguration, validateServer: boolean) : Promise<WilmaAccountInstance> {
+		
 		return {
 			session: {
 				id: '',

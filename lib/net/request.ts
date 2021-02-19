@@ -8,15 +8,16 @@ const axios = require("axios")
 
 type RequestHeader = {
     name: string,
-    value: string,
-    encode: boolean
+    value: string
 }
 
 interface RequestOptions {
     url: string,
     headers?: Array<RequestHeader>,
     body?: string|any,
-    timeout?: number
+    timeout?: number,
+    session?: WilmaSession,
+    excludeEncoding?: string[] // Exclude these from the response data encoder
 }
 
 interface RequestResponse {
@@ -29,9 +30,10 @@ interface RequestResponse {
 
 /**
  * Perform a http(s) request
- * @param config 
+ * @param {string} method The HTTP(S) method
+ * @param {RequestOptions} options Request options
  */
-export async function request(method: string, session: WilmaSession|null, options: RequestOptions): Promise<RequestResponse> {
+export async function request(method: string, options: RequestOptions): Promise<RequestResponse> {
     // Verify inputs
     if(
         /[get]|[post]|[put]/g.test(method) &&
@@ -49,7 +51,7 @@ export async function request(method: string, session: WilmaSession|null, option
         for(let i: number = 0; i < options.headers.length; i++){
             let header: RequestHeader = options.headers[i]
             // Verify header
-            if(header.name == undefined || header.value == undefined || (header.encode != undefined ? typeof header.encode == "boolean" : true)){
+            if(header.name == undefined || header.value == undefined){
                 throw new Error("Invalid header at index " + i)
             }else {
                 // Valid header
@@ -76,10 +78,15 @@ export async function request(method: string, session: WilmaSession|null, option
                 // Encode the body
                 try {
                     let temp = ""
-                    let keys = Object.keys(options.body)
-                    for(let i = 0; i < keys.length; i++){
+                    let keys: string[] = Object.keys(options.body)
+                    for(let i: number = 0; i < keys.length; i++){
                         if(temp != "") temp = temp + "&"
-                        temp = temp + encodeURIComponent(keys[i]) + "=" + encodeURIComponent(options.body[keys[i]])
+                        // WTF is this error?
+                        if(options.excludeEncoding != undefined && Array.isArray(options.excludeEncoding) && options.excludeEncoding.includes(keys[i])){
+                            temp = temp + encodeURIComponent(keys[i]) + "=" + options.body[keys[i]]
+                        }else {
+                            temp = temp + encodeURIComponent(keys[i]) + "=" + encodeURIComponent(options.body[keys[i]])
+                        }
                     }
                     options.body = temp
                 }
@@ -94,15 +101,15 @@ export async function request(method: string, session: WilmaSession|null, option
         }
 
         // Append custom headers from session
-        if(session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + session.id
+        if(options.session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + options.session.id
 
         // Append credentials to application/json body by default
         if(headers["Content-Type"] != undefined && headers["Content-Type"].toLoweCase() == "application/json"){
             if(options.body.format == undefined) options.body.format = "json"
             if(options.body.CompleteJson == undefined) options.body.CompleteJson = true
-            if(session != null){
-                if(options.body.formkey == undefined) options.body.formkey = session.formkey
-                if(options.body.secret == undefined) options.body.secret = session.secret
+            if(options.session != null){
+                if(options.body.formkey == undefined) options.body.formkey = options.session.formkey
+                if(options.body.secret == undefined) options.body.secret = options.session.secret
             }
         }
 
@@ -125,5 +132,17 @@ export async function request(method: string, session: WilmaSession|null, option
         })
     }else {
         throw new Error("Invalid request arguments")
+    }
+}
+
+export default {
+    get: async function(options: RequestOptions){
+        return request("get", options)
+    },
+    post: async function(options: RequestOptions){
+        return request("get", options)
+    },
+    put: async function(options: RequestOptions){
+        return request("put", options)
     }
 }
