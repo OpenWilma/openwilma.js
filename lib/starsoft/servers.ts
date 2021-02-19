@@ -7,7 +7,6 @@ export async function listServers(): Promise<WilmaServer[]> {
         let servers: RequestResponse = await request.get({
             url: "https://www.starsoft.fi/wilmat/wilmat.json"
         });
-        console.log("runs")
         if(servers.status == 200){
             let list: WilmaServer[] = servers.data.wilmat
             return list
@@ -16,6 +15,6 @@ export async function listServers(): Promise<WilmaServer[]> {
         }
     }
     catch(err){
-        throw new Errors.UnexpectedCatch(err);
+        throw new Error(err);
     }
 }

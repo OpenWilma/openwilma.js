@@ -25,6 +25,15 @@ export async function request(method: string, options: RequestOptions): Promise<
         // Make sure method is in lower case
         method = method.toLowerCase()
 
+        // Build URL from session if using endpoint
+        if(options.endpoint != undefined){
+            if(options.session == undefined) throw new Errors.APIRequestPreflightError("Failed to build url from endpoint and session. Required values missing.")
+            options.url = options.session.server + options.endpoint
+        }
+
+        // If URL is still undefined, we need to throw an error right here
+        if(options.url == undefined) throw new Errors.APIRequestPreflightError("Request url undefined.")
+
         // Build headers
         if(options.headers == undefined) options.headers = []
         let headers: any = {}
@@ -57,11 +66,11 @@ export async function request(method: string, options: RequestOptions): Promise<
             // This means we will use default of Application/json if we have a non-get request
             // Otherwise don't set the header
             if(method != "get"){
-                headers["Content-Type"] = "Application/json"
+                headers["Content-Type"] = "application/json"
             }
         }else {
             // We have a custom header.
-            switch(headers["Content-Type"].value.toLowerCase()){
+            switch(headers["Content-Type"].toLowerCase()){
             case "application/x-www-form-urlencoded":
                 // Encode the body
                 try {
@@ -88,10 +97,10 @@ export async function request(method: string, options: RequestOptions): Promise<
         }
 
         // Append custom headers from session
-        if(options.session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + options.session.id
+        if(options.session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + options.session.id + ";"
 
         // Append credentials to application/json body by default
-        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLoweCase() == "application/json"){
+        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLowerCase() == "application/json"){
             if(options.body.format == undefined) options.body.format = "json"
             if(options.body.CompleteJson == undefined) options.body.CompleteJson = true
             if(options.session != null){
@@ -101,11 +110,18 @@ export async function request(method: string, options: RequestOptions): Promise<
         }
 
         // Perform request through axios
+        console.log({url: options.url,
+            method: method,
+            data: options.body,
+            timeout: options.timeout == undefined ? 30000 : options.timeout,
+            headers: headers})
         let req = axios({
             url: options.url,
             method: method,
             data: options.body,
-            timeout: options.timeout == undefined ? 30000 : options.timeout
+            timeout: options.timeout == undefined ? 30000 : options.timeout,
+            headers: headers,
+            redirect: options.redirect == false ? "manual" : undefined
         })
         req.catch((err: Error) => {
             throw new Errors.APIRequestPostflightError(err)

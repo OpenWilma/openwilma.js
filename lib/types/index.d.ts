@@ -4,28 +4,28 @@
 
 /**
  * Wilma session object
- * @param {String} id Session ID
- * @param {String} formkey Form key for sending form data
- * @param {String} secret Account secret
- * @param {String} slug Possible user slug (for multi-user accounts)
+ * @param {string} id Session ID
+ * @param {string} formkey Form key for sending form data
+ * @param {string} secret Account secret
+ * @param {string} slug Possible user slug (for multi-user accounts)
  */
 export interface WilmaSession {
-    id: String,
-    formkey: String,
-    secret: String,
-    slug: String
+    id: string,
+    formkey: string,
+    secret: string,
+    slug: string
 }
 
 /**
  * The Wilma account configuration
- * @param {String} username The account username
- * @param {String} password The account password
- * @param {String} server The Wilma server as a string.
+ * @param {string} username The account username
+ * @param {string} password The account password
+ * @param {string} server The Wilma server as a string.
  */
 export default interface WilmaAccountConfiguration {
-    username: String,
-	password: String
-	server: String
+    username: string,
+	password: string
+	server: string
 }
 
 /**
