@@ -1,14 +1,18 @@
-import { request } from "../net/request"
+import apiRequest from "../net/apiRequest"
+import {RequestResponse} from "../types/apiRequest"
 import {WilmaServer} from "../types"
+import { SAPIError } from "../utils/error"
 
-const listServers = async (): Promise<Array<WilmaServer>> => {
-    const servers = await request("get", null, {
+export const serverList = async (): Promise<WilmaServer[]> => {
+    const response: RequestResponse = await apiRequest.get({
         url: "https://www.starsoft.fi/wilmat/wilmat.json"
     })
 
-    console.log(servers)
+    console.log("runs")
 
-    return servers
+    if (response.status === 200) {
+        return response.data.wilmat
+    } else {
+        throw new SAPIError(`Starsoft API responded with ${response.status}`)
+    }
 }
-
-export default listServers

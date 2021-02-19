@@ -43,6 +43,17 @@
                 "destructuring": "any"
             }
         ],
+        "space-before-blocks": [
+            "error",
+            "always"
+        ],
+        "keyword-spacing": [
+            "error",
+            {
+                "after": true,
+                "before": true
+            }
+        ],
         "max-len": [1, 80, 4]
     }
 }

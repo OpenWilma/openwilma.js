@@ -8,9 +8,9 @@
  */
 
 import login from "./account/login"
-import listServers from "./misc/starsoft"
+import { serverList } from "./misc/starsoft"
 
 module.exports = {
     login,
-    listServers
+    serverList
 }

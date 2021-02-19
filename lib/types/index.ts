@@ -5,7 +5,7 @@ export interface WilmaServer {
 }
 
 export interface WilmaApiCredentials {
-    sessionId: string,
+    id: string,
     formkey: string,
     secret: string
 }
