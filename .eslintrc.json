@@ -4,18 +4,23 @@
         "commonjs": true,
         "es2021": true
     },
-    "extends": "eslint:recommended",
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
     "parserOptions": {
-        "ecmaVersion": 12
+        "ecmaVersion": 12,
+        "sourceType": "module"
     },
     "rules": {
         "indent": [
             "error",
-            "tab"
-        ],
-        "linebreak-style": [
-            "error",
-            "windows"
+            4
         ],
         "quotes": [
             "error",
@@ -24,6 +29,19 @@
         "semi": [
             "error",
             "never"
+        ],
+        "eqeqeq": [
+            "error",
+            "smart"
+        ],
+        "comma-dangle": [
+            "error",
+            "never"
+        ],
+        "prefer-const": [
+            "error", {
+                "destructuring": "any"
+            }
         ],
         "max-len": [1, 80, 4]
     }
