@@ -85,7 +85,7 @@ export async function request(method: string, options: RequestOptions): Promise<
                             temp = temp + encodeURIComponent(keys[i]) + "=" + encodeURIComponent(options.body[keys[i]])
                         }
                     }
-                    options.body = temp;
+                    options.body = temp
                 }
                 catch(err){
                     console.error(err) // Print this for now
@@ -110,6 +110,9 @@ export async function request(method: string, options: RequestOptions): Promise<
             }
         }
 
+        // Add user-agent header
+        if(headers["User-Account"] == undefined) headers["User-Account"] = "OpenWilma/1.0.0"
+
         // Perform request through axios
         let req = axios({
             url: options.url,
@@ -118,7 +121,7 @@ export async function request(method: string, options: RequestOptions): Promise<
             timeout: options.timeout == undefined ? 30000 : options.timeout,
             headers: headers,
             maxRedirects: options.redirect == false ? 0 : 10,
-            validateStatus: options.statusCheck
+            validateStatus: options.statusCheck,
         })
         req.catch((err: Error) => {
             throw new Errors.APIRequestPostflightError(err)

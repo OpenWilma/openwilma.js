@@ -9,11 +9,11 @@ const server = process.argv[4]
 const ses = new op.client()
 
 ses.login({
-    username: username,
-    password: password,
-    server: server
-}).then(login => {
-    console.log("session: "+login);
+	username: username,
+	password: password,
+	server: server
+}, false).then(login => {
+	console.log("session: "+login)
 }).catch(err => {
-    console.error(err);
+	console.error(err)
 })

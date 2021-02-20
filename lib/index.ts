@@ -28,104 +28,126 @@ class OpenWilmaCore {
 	async login(account: WilmaAccountConfiguration, validateServer: boolean, versionCheck: boolean) : Promise<void | WilmaAccountInstance> {
 		try {
 			// Validate server
-			let servers: WilmaServer[] = await listServers()
-			if(validateServer){
+			if(validateServer != false){
+				let servers: WilmaServer[] = await listServers()
 				let result = servers.find(({url, formerUrl}) => url === account.server || formerUrl == account.server);
 				if(result !== undefined) {
 					// Warn about the possible usage of an old url
 					if(result.formerUrl === account.server){
 						warn("Supplied an old URL for a Wilma Server. Please use \"" + result.url + "\" in the future to access the \"" + result.name + "\" Wilma server.", "UsedFormerURL")
 					}
-					// Server is now valid
-					await this.loginRoutine(account, versionCheck);
-				} else {
+				}else {
 					throw new Errors.WAPIError("No such Wilma server available as: \"" + account.server + "\". If you are trying to connect to an unofficial Wilma server, disable server validation (more information in the OpenWilma documentation).")
 				}
-			} else {
-				 return await this.loginRoutine(account, versionCheck);
+			}
+			// Login
+			// Check the server API version
+			try {
+				const WilmaServer: RequestResponse = await apiRequest.get({
+					url: account.server + "/index_json"
+				})
+				if(WilmaServer.status == 200){
+					// Check API version
+					if(!supportedVersions.includes(WilmaServer.data.ApiVersion)){
+						if(versionCheck !== true){
+							throw new Errors.WAPIError("Unsupported Wilma server. You can disable this check by setting versionCheck to false (more information in the OpenWilma documentation).")
+						}else {
+							warn("Version check disabled.", "Version support")
+						}
+					}
+					// Perform login steps
+					const req = await apiRequest.post({
+						url: account.server + "/index_json",
+						body: {
+							Login: account.username,
+							Password: account.password,
+							SESSIONID: WilmaServer.data.SessionID,
+							CompleteJson: '',
+							format: 'json'
+						},
+						headers: [
+							{name: "Content-Type", value: "application/x-www-form-urlencoded"}
+						],
+						redirect: false,
+						statusCheck: (num) => {return num == 303}
+					})
+					if(req.status == 303){
+						// Good response
+						if(req.headers['set-cookie']) {
+							let sessionValue = null // The session id
+							for (let cookie of req.headers['set-cookie']) {
+								if(cookie.includes("Wilma2SID")) {
+									// Wilma COOKIE
+									let sessionId = /^(.*)Wilma2SID=([^;]+)(.*)$/.exec(cookie);
+									if(sessionId !== null) {
+										sessionValue = sessionId[2];
+									}
+								}
+							}
+							if(!sessionValue) {
+								throw new Errors.WAPIAuthError("Sign in failed, invalid username or password?")
+							}
+							// SessionID is now valid. Get secret and formkey
+							const creds = await apiRequest.get({
+								url: account.server + "/messages?format=json&CompleteJson=",
+								headers: [
+									{name: "Cookie", value: "Wilma2SID=" + sessionValue}
+								]
+							})
+							if(creds.status == 200){
+								// Parse secret and formkey from URL
+								try {
+									let secret: string = creds.data.split("name=\"secret\" value=\"")[1].split("\"")[0]
+									let formkey: string = creds.data.split("name=\"formkey\" value=\"")[1].split("\"")[0]
+									if(secret && formkey){
+										// We got all credentials
+										// Build session
+										let session: WilmaSession = {
+											id: sessionValue,
+											secret: secret,
+											formkey: formkey,
+											server: account.server,
+											slug: null
+										}
+										return new WilmaAccountInstance(session)
+									}else {
+										throw new Errors.WAPIParserError("Credentials response parser returned undefined for formkey or secret.")
+									}
+								}
+								catch(err){
+									throw new Errors.WAPIParserError("Failed to parse secondary credentials from messages response.")
+								}
+							}else {
+								throw new Errors.WAPIAuthError("Failed to fetch secondary credentials.")
+							}
+						}else {
+							throw new Errors.WAPIAuthError("SessionID cookie expected in response body.")
+						}
+						// Check login result
+					} else {
+						throw new Errors.WAPIServerError(req.data.error)
+					}
+				}else {
+					throw new Errors.WAPIServerError(WilmaServer.data.error)
+				}
+			}
+			catch(err){
+				throw new Errors.APIRequestError(err)
 			}
 		}
 		catch(err){
 			throw new Error(err)
 		}
 	}
-
-	private async loginRoutine(account: WilmaAccountConfiguration, versionCheck: boolean) {
-		// Check the server API version
-		try {
-			const WilmaServer: RequestResponse = await apiRequest.get({
-				url: account.server + "/index_json"
-			})
-			if(WilmaServer.status == 200){
-				// Check API version
-				if(!supportedVersions.includes(WilmaServer.data.ApiVersion)){
-					if(versionCheck !== true){
-						throw new Errors.WAPIError("Unsupported Wilma server. You can disable this check by setting versionCheck to false (more information in the OpenWilma documentation).")
-					}else {
-						warn("Version check disabled.", "Version support")
-					}
-				}
-				// Perform login steps
-				const req = await apiRequest.post({
-					url: account.server+"/index_json",
-					body: {
-						Login: account.username,
-						Password: account.password,
-						SESSIONID: WilmaServer.data.SessionID,
-						CompleteJson: '',
-						format: 'json'
-					},
-					headers: [
-						{name: "Content-Type", value: "application/x-www-form-urlencoded"},
-						{name: "User-Agent", value: "OpenWilma/0.0.1"}
-						//{name: "Cookie", value: "Wilma2LoginID=" + WilmaServer.data.SessionID + ";"}
-					],
-					redirect: false,
-					statusCheck: (num) => {return num == 303;}
-				})
-				if(req.status == 303){
-					if (req.headers['set-cookie']) {
-						let sessionValue = null;
-						for (let cookie of req.headers['set-cookie']) {
-							if (cookie.includes("Wilma2SID")) {
-								//Wilma COOKIE
-								let sessionId = /^(.*)Wilma2SID=([^;]+)(.*)$/.exec(cookie);
-								if (sessionId !== null) {
-									sessionValue = sessionId[2];
-								}
-							}
-						}
-						if (!sessionValue) {
-							throw new Errors.WilmaAuthError("Sign in failed, invalid username or password?")
-						}
-						console.log(sessionValue);
-					}
-					// Check login result
-					//console.log(req)
-				} else {
-					throw new Errors.WAPIServerError(req.data.error)
-				}
-			}else {
-				throw new Errors.WAPIServerError(WilmaServer.data.error)
-			}
-		}
-		catch(err){
-			throw new Errors.APIRequestError(err)
-		}
-	}
-
 }
 
+/**
+ * WilmaAccountInstance
+ */
 class WilmaAccountInstance {
 	session: WilmaSession
-	constructor(session_id: string, secret: string, formkey: string, slug: string, server: string){
-		this.session = {
-			id: session_id,
-			formkey: formkey,
-			secret: secret,
-			slug: slug,
-			server: server
-		}
+	constructor(session: WilmaSession){
+		this.session = session
 	}
 }
 
