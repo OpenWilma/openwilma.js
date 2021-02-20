@@ -15,7 +15,8 @@ export interface RequestOptions {
     session?: WilmaSession,
     excludeEncoding?: string[], // Exclude these from the response data encoder,
     endpoint?: string // Endpoint if the api session fills the url base,
-    redirect?: boolean
+    redirect?: boolean,
+    statusCheck?: (status:number) => void
 }
 
 export interface RequestResponse {

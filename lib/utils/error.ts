@@ -10,6 +10,18 @@ class WAPIServerError extends Error {
         this.name = "WAPIServerError"
     }
 }
+
+/**
+ * Wilma Auth error
+ */
+class WilmaAuthError extends Error {
+    constructor(m: any){
+        super(m)
+        Object.setPrototypeOf(this, Error.prototype)
+        this.name = "WilmaAuthError"
+    }
+}
+
 /**
  * Wilma API internal error
  */
@@ -63,5 +75,6 @@ export default {
     APIRequestPreflightError: APIRequestPreflightError,
     APIRequestPostflightError: APIRequestPostflightError,
     WAPIError: WAPIError,
-    WAPIServerError: WAPIServerError
+    WAPIServerError: WAPIServerError,
+    WilmaAuthError
 }

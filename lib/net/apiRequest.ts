@@ -1,4 +1,5 @@
 // Axios wrapper
+
 const axios = require("axios")
 // TODO: Implement custom error type
 
@@ -84,12 +85,7 @@ export async function request(method: string, options: RequestOptions): Promise<
                             temp = temp + encodeURIComponent(keys[i]) + "=" + encodeURIComponent(options.body[keys[i]])
                         }
                     }
-                    // Push to url
-                    if(options.url.includes("?")){
-                        options.url += "&" + temp
-                    }else {
-                        options.url += "?" + temp
-                    }
+                    options.body = temp;
                 }
                 catch(err){
                     console.error(err) // Print this for now
@@ -121,7 +117,8 @@ export async function request(method: string, options: RequestOptions): Promise<
             data: options.body,
             timeout: options.timeout == undefined ? 30000 : options.timeout,
             headers: headers,
-            redirect: options.redirect == false ? "manual" : undefined
+            maxRedirects: options.redirect == false ? 0 : 10,
+            validateStatus: options.statusCheck
         })
         req.catch((err: Error) => {
             throw new Errors.APIRequestPostflightError(err)

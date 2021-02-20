@@ -12,4 +12,8 @@ ses.login({
     username: username,
     password: password,
     server: server
+}).then(login => {
+    console.log("session: "+login);
+}).catch(err => {
+    console.error(err);
 })
