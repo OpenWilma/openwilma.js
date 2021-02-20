@@ -21,8 +21,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
-    "typescript": "^3.9.7",
-    "https-proxy-agent": "^5.0.0"
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "build": "rollup -c rollup.config.ts",
