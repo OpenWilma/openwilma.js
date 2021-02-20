@@ -8,12 +8,15 @@ export type RequestHeader = {
 }
 
 export interface RequestOptions {
-    url: string,
+    url?: string,
     headers?: Array<RequestHeader>,
     body?: string|any,
     timeout?: number,
     session?: WilmaSession,
-    excludeEncoding?: string[] // Exclude these from the response data encoder
+    excludeEncoding?: string[], // Exclude these from the response data encoder,
+    endpoint?: string // Endpoint if the api session fills the url base,
+    redirect?: boolean,
+    statusCheck?: (status:number) => void
 }
 
 export interface RequestResponse {

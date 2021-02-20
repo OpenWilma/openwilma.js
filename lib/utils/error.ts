@@ -1,16 +1,4 @@
 // OpenWilma error types
-/**
- * This error is thrown when an unexpected error has been handled.
- * 
- * These errors are often bugs or hardcoded errors.
- */
-class UnexpectedCatch extends Error {
-    constructor(m: any){
-        super(m)
-        Object.setPrototypeOf(this, Error.prototype)
-        this.name = "UnexpectedCatch"
-    }
-}
 
 /**
  * Wilma API external (server() error 
@@ -22,6 +10,27 @@ class WAPIServerError extends Error {
         this.name = "WAPIServerError"
     }
 }
+
+/**
+ * Wilma Auth error
+ */
+class WAPIAuthError extends Error {
+    constructor(m: any){
+        super(m)
+        Object.setPrototypeOf(this, Error.prototype)
+        this.name = "WilmaAuthError"
+    }
+}
+
+
+class WAPIParserError extends Error {
+    constructor(m: any){
+        super(m)
+        Object.setPrototypeOf(this, Error.prototype)
+        this.name = "WAPIParserError"
+    }
+}
+
 /**
  * Wilma API internal error
  */
@@ -70,11 +79,12 @@ class APIRequestPostflightError extends Error {
 }
 
 export default {
-    UnexpectedCatch: UnexpectedCatch,
-    SAPIError: SAPIError,
-    APIRequestError: APIRequestError,
-    APIRequestPreflightError: APIRequestPreflightError,
-    APIRequestPostflightError: APIRequestPostflightError,
-    WAPIError: WAPIError,
-    WAPIServerError: WAPIServerError
+    SAPIError,
+    APIRequestError,
+    APIRequestPreflightError,
+    APIRequestPostflightError,
+    WAPIError,
+    WAPIServerError,
+    WAPIAuthError,
+    WAPIParserError
 }

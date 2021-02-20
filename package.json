@@ -10,17 +10,18 @@
   "types": "dist/index.d.ts",
   "typings": "lib/types/index.d.ts",
   "devDependencies": {
-    "eslint": "^7.20.0",
+    "@types/node": "^14.14.31",
     "@types/typescript": "^2.0.0",
+    "eslint": "^7.20.0",
+    "jsdoc": "^3.6.6",
+    "minami": "^1.2.3",
     "rollup": "^2.23.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-json": "^4.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-typescript2": "^0.27.2",
-    "typescript": "^3.9.7",
-    "jsdoc": "^3.6.6",
-    "minami": "^1.2.3"
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "build": "rollup -c rollup.config.ts",
