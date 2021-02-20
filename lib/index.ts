@@ -61,13 +61,13 @@ class OpenWilmaCore {
 									SESSIONID: WilmaServer.data.SessionID
 								},
 								headers: [
-									{name: "Content-Type", value: "application/x-www-form-urlencoded"}
+									{name: "Content-Type", value: "application/x-www-form-urlencoded"},
+									{name: "Cookie", value: "Wilma2LoginID=" + WilmaServer.data.SessionID + ";"}
 								],
 								redirect: false
 							})
 							if(req.status == 200){
-								// Session ID is now active
-								// Get the secret and formkey
+								// Check login result
 								console.log(req)
 							}else {
 								throw new Errors.WAPIServerError(req.data.error)

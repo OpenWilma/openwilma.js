@@ -84,7 +84,12 @@ export async function request(method: string, options: RequestOptions): Promise<
                             temp = temp + encodeURIComponent(keys[i]) + "=" + encodeURIComponent(options.body[keys[i]])
                         }
                     }
-                    options.body = temp
+                    // Push to url
+                    if(options.url.includes("?")){
+                        options.url += "&" + temp
+                    }else {
+                        options.url += "?" + temp
+                    }
                 }
                 catch(err){
                     console.error(err) // Print this for now
@@ -110,14 +115,9 @@ export async function request(method: string, options: RequestOptions): Promise<
         }
 
         // Perform request through axios
-        console.log({url: options.url,
-            method: method,
-            data: options.body,
-            timeout: options.timeout == undefined ? 30000 : options.timeout,
-            headers: headers})
         let req = axios({
             url: options.url,
-            method: method,
+            method: method.toUpperCase(),
             data: options.body,
             timeout: options.timeout == undefined ? 30000 : options.timeout,
             headers: headers,
