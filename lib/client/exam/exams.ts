@@ -34,14 +34,11 @@ export default class ExamManager{
                     date.setDate(exam.Date.split("-")[2])
 
                     // Convert teachers
-                    let teachers: WilmaTeacher[] = []
-                    for(let teacher of exam.Teachers){
-                        teachers.push({
-                            id: teacher.TeacherId,
-                            name: teacher.TeacherName,
-                            code: teacher.TeacherCode
-                        })
-                    }
+                    let teachers: WilmaTeacher[] = exam.Teachers.map((t: any) => ({
+                        id: t.TeacherId,
+                        name: t.TeacherName,
+                        code: t.TeacherCode
+                    }))
 
                     // Build object
                     built.push({

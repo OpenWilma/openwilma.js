@@ -14,10 +14,11 @@ ses.login({
 	username: username,
 	password: password,
 	server: server
-}, false).then(account => {
+}, false).then(async account => {
 	console.log("Logged in")
 	console.log(account)
-	account.exams.list()
+	let exams = await account.exams.list()
+	console.log(exams)
 }).catch(err => {
 	console.error(err)
 })
