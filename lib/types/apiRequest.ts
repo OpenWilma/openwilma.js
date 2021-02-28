@@ -1,6 +1,6 @@
 // API Request typings
 
-import {WilmaSession} from "./WilmaSession"
+import {WilmaSession} from "./index"
 
 export type RequestHeader = {
     name: string,

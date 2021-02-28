@@ -53,13 +53,11 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
             }
         }
-        // Get GET request responses as JSON
-        if(method == "get"){
-            if(options.url.includes("?")){
-                options.url = options.url + "&format=json" // This could be done better
-            }else {
-                options.url = options.url + "?format=json"
-            }
+        // Getrequest responses as JSON
+        if(options.url.includes("?")){
+            options.url = options.url + "&format=json&CompleteJson" // This could be done better
+        }else {
+            options.url = options.url + "?format=json&CompleteJson"
         }
 
         // Request body formatting
@@ -101,7 +99,7 @@ export async function request(method: string, options: RequestOptions): Promise<
         if(options.session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + options.session.id + ";"
 
         // Append credentials to application/json body by default
-        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLowerCase() == "application/json"){
+        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLowerCase() == "application/json" && options.body != undefined){
             if(options.body.format == undefined) options.body.format = "json"
             if(options.body.CompleteJson == undefined) options.body.CompleteJson = true
             if(options.session != null){

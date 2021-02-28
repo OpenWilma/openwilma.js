@@ -12,8 +12,9 @@ ses.login({
 	username: username,
 	password: password,
 	server: server
-}, false).then(login => {
-	console.log("session: "+login)
+}, false).then(account => {
+	console.log("Logged in")
+	account.exams.list()
 }).catch(err => {
 	console.error(err)
 })
