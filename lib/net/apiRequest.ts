@@ -1,7 +1,6 @@
 // Axios wrapper
 
 const axios = require("axios")
-// TODO: Implement custom error type
 
 // Typings
 import {RequestHeader, RequestOptions, RequestResponse} from "../types/apiRequest"
@@ -53,13 +52,22 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
             }
         }
-        // Get GET request responses as JSON
-        if(method == "get"){
+
+        // Always ask for json formatting
+        if(method.toLowerCase() == "get"){
+            // If we have a get request, put this in the url
+            // Note: If this query parameter in post parameters, A bug triggers and the server returns unexpected responses. Thus we only pass this for GET requests.
             if(options.url.includes("?")){
-                options.url = options.url + "&format=json" // This could be done better
+                options.url = options.url + "&format=json&CompleteJson" // This could be done better
             }else {
-                options.url = options.url + "?format=json"
+                options.url = options.url + "?format=json&CompleteJson"
             }
+        }else {
+            // See note above
+            if(options.body != undefined){
+                options.body.format = "json"
+                options.body.CompleteJson = ""
+            } 
         }
 
         // Request body formatting
@@ -93,7 +101,7 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
                 break
             default:
-                // Nothing to do here. Axios will handle formatting for other stuff.
+                // Nothing to do here for now. Axios will handle formatting for other stuff.
             }
         }
 
@@ -101,7 +109,7 @@ export async function request(method: string, options: RequestOptions): Promise<
         if(options.session != undefined) headers["Cookie"] = (headers["Cookie"] == undefined ? "" : headers["Cookie"] + "; ") + "Wilma2SID=" + options.session.id + ";"
 
         // Append credentials to application/json body by default
-        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLowerCase() == "application/json"){
+        if(headers["Content-Type"] != undefined && headers["Content-Type"].toLowerCase() == "application/json" && options.body != undefined){
             if(options.body.format == undefined) options.body.format = "json"
             if(options.body.CompleteJson == undefined) options.body.CompleteJson = true
             if(options.session != null){

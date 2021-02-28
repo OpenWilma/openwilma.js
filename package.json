@@ -25,11 +25,13 @@
   },
   "scripts": {
     "build": "rollup -c rollup.config.ts",
-    "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib"
+    "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib",
+    "autobuild": "node ./dev/autobuild.js"
   },
   "dependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.0",
     "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
     "terser": "^5.6.0"
   }
 }

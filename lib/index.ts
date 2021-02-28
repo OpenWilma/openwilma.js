@@ -1,12 +1,12 @@
 const supportedVersions = [11] // The supported Wilma API versions
-import WilmaAccountConfiguration from "./types";
-import  {WilmaSession} from "./types/WilmaSession"
+import {WilmaSession, WilmaAccountConfiguration} from "./types"
 import Errors from "./utils/error"
 import {listServers} from "./starsoft/servers"
 import {WilmaServer} from "./types/starsoft";
 import warn from "./utils/warn"
 import apiRequest from "./net/apiRequest";
 import { RequestResponse } from "./types/apiRequest";
+import ExamManager from "./client/exam/exams";
 /**
  *
  * This is the Javascript version of the OpenWilma project.
@@ -89,7 +89,7 @@ class OpenWilmaCore {
 							}
 							// SessionID is now valid. Get secret and formkey
 							const creds = await apiRequest.get({
-								url: account.server + "/messages?format=json&CompleteJson=",
+								url: account.server + "/messages",
 								headers: [
 									{name: "Cookie", value: "Wilma2SID=" + sessionValue}
 								]
@@ -148,6 +148,11 @@ class WilmaAccountInstance {
 	session: WilmaSession
 	constructor(session: WilmaSession){
 		this.session = session
+	}
+
+	/* Exams */
+	get exams(){
+		return new ExamManager(this.session)
 	}
 }
 

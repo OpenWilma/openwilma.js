@@ -8,12 +8,17 @@ const server = process.argv[4]
 
 const ses = new op.client()
 
+// akuli TestiSalasana <server ;)>
+
 ses.login({
 	username: username,
 	password: password,
 	server: server
-}, false).then(login => {
-	console.log("session: "+login)
+}, false).then(async account => {
+	console.log("Logged in")
+	console.log(account)
+	let exams = await account.exams.list()
+	console.log(exams)
 }).catch(err => {
 	console.error(err)
 })

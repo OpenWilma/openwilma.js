@@ -8,12 +8,14 @@
  * @param {string} formkey Form key for sending form data
  * @param {string} secret Account secret
  * @param {string} slug Possible user slug (for multi-user accounts)
+ * @param {string} server The Wilma server as a string.
  */
 export interface WilmaSession {
     id: string,
     formkey: string,
     secret: string,
-    slug: string
+    slug: string|null,
+    server: string
 }
 
 /**
@@ -22,7 +24,7 @@ export interface WilmaSession {
  * @param {string} password The account password
  * @param {string} server The Wilma server as a string.
  */
-export default interface WilmaAccountConfiguration {
+export interface WilmaAccountConfiguration {
     username: string,
 	password: string
 	server: string
