@@ -13,20 +13,33 @@ const compile = async () => {
             shells[shell].kill("SIGKILL")
         }
     }
-    let stdoutCache = ""
+    let stderrCache = ""
     let sh = cp.exec("npm run build", async (error) => {
-        if(error != null){
-            console.log(error)
-        }
+        // Nothing here
     })
     shells[new Date().getTime()] = sh
-    sh.stdout.on("data", async data => {
+    sh.stderr.on("data", async data => {
         data = data.toString()
-        stdoutCache += data
+        stderrCache += data
     })
     sh.on("exit", async (code, signal) => {
         if(code != 0){
-            console.log("Failed to build:\n", stdoutCache)
+            try {
+                // Flush some useless stuff out
+                stderrCache = stderrCache.split("Error:")
+                stderrCache.splice(2, 1)
+                stderrCache = stderrCache.join("Error:").split("\n")
+                stderrCache.splice(stderrCache.length-1, 1)
+                stderrCache = stderrCache.join("\n").split("\n")
+                stderrCache[stderrCache.length-1] = "Location: " + stderrCache[stderrCache.length-1]
+                stderrCache = stderrCache.join("\n")
+                console.log(stderrCache)
+                hold = false
+            }
+            catch(err){
+                console.log("Build failed and error message parser failed.")
+                hold = false
+            }
         }else if(signal != "SIGKILL"){
             console.log("\x1b[32mBuilt!\x1b[0m")
             hold = false
