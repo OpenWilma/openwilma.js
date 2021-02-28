@@ -36,7 +36,7 @@ const compile = async () => {
 
 fs.watch("./", {recursive: true}, async (event, filename) => {
     if(hold){
-        if(filename.startsWith("dist")){
+        if(filename != null && filename.startsWith("dist")){
             console.log("\x1b[34m   Compiled " + filename + "\x1b[0m")
         }
         return
