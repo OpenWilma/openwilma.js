@@ -1,7 +1,6 @@
 // Axios wrapper
 
 const axios = require("axios")
-// TODO: Implement custom error type
 
 // Typings
 import {RequestHeader, RequestOptions, RequestResponse} from "../types/apiRequest"
@@ -53,11 +52,22 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
             }
         }
-        // Getrequest responses as JSON
-        if(options.url.includes("?")){
-            options.url = options.url + "&format=json&CompleteJson" // This could be done better
+
+        // Always ask for json formatting
+        if(method.toLowerCase() == "get"){
+            // If we have a get request, put this in the url
+            // Note: If this query parameter in post parameters, A bug triggers and the server returns unexpected responses. Thus we only pass this for GET requests.
+            if(options.url.includes("?")){
+                options.url = options.url + "&format=json&CompleteJson" // This could be done better
+            }else {
+                options.url = options.url + "?format=json&CompleteJson"
+            }
         }else {
-            options.url = options.url + "?format=json&CompleteJson"
+            // See note above
+            if(options.body != undefined){
+                options.body.format = "json"
+                options.body.CompleteJson = ""
+            } 
         }
 
         // Request body formatting
@@ -91,7 +101,7 @@ export async function request(method: string, options: RequestOptions): Promise<
                 }
                 break
             default:
-                // Nothing to do here. Axios will handle formatting for other stuff.
+                // Nothing to do here for now. Axios will handle formatting for other stuff.
             }
         }
 
