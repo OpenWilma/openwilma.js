@@ -89,7 +89,7 @@ class OpenWilmaCore {
 							}
 							// SessionID is now valid. Get secret and formkey
 							const creds = await apiRequest.get({
-								url: account.server + "/messages?format=json&CompleteJson=",
+								url: account.server + "/messages",
 								headers: [
 									{name: "Cookie", value: "Wilma2SID=" + sessionValue}
 								]
