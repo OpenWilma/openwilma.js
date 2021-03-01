@@ -10,12 +10,18 @@ import Errors from "../../utils/error"
 import { WilmaExam } from "../../types/exam"
 import { WilmaTeacher } from "../../types/teacher"
 
-export default class ExamManager{
+/**
+ * Account exams manager class
+ */
+export default class ExamManager {
     session: WilmaSession
     constructor(session: WilmaSession){
         this.session = session
     }
 
+    /**
+     * List all exams
+     */
     async list(){
         try {
             // Get exams that have not yet concluded
