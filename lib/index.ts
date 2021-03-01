@@ -7,6 +7,7 @@ import warn from "./utils/warn"
 import apiRequest from "./net/apiRequest";
 import { RequestResponse } from "./types/apiRequest";
 import ExamManager from "./client/exam/exams";
+import MessageManager from "./client/message/messages";
 /**
  *
  * This is the Javascript version of the OpenWilma project.
@@ -153,6 +154,11 @@ class WilmaAccountInstance {
 	/* Exams */
 	get exams(){
 		return new ExamManager(this.session)
+	}
+
+	/* Messages */
+	get messages(){
+		return new MessageManager(this.session)
 	}
 }
 
