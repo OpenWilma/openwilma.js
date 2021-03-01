@@ -17,8 +17,11 @@ ses.login({
 }, false).then(async account => {
 	console.log("Logged in")
 	console.log(account)
-	let exams = await account.exams.list()
-	console.log(exams)
+	//let exams = await account.exams.list()
+	//console.log(exams)
+	//let messages = await account.messages.list("inbox")
+	//console.log(messages)
+	let recipients = await account.messages.listRecipients()
 }).catch(err => {
 	console.error(err)
 })
