@@ -22,7 +22,7 @@ export default class ExamManager {
     /**
      * List all exams
      */
-    async list(){
+    async list(): Promise<WilmaExam[]> {
         try {
             // Get exams that have not yet concluded
             const exams = await apiRequest.get({

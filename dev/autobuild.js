@@ -31,6 +31,7 @@ const compile = async () => {
                 stderrCache = stderrCache.join("Error:").split("\n")
                 stderrCache.splice(stderrCache.length-1, 1)
                 stderrCache = stderrCache.join("\n").split("\n")
+                if(stderrCache.includes("Error:")) stderrCache = stderrCache.split("Error:")[0]
                 stderrCache[stderrCache.length-1] = "Location: " + stderrCache[stderrCache.length-1]
                 stderrCache = stderrCache.join("\n")
                 console.log(stderrCache)
