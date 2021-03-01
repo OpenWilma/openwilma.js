@@ -119,7 +119,7 @@ export async function request(method: string, options: RequestOptions): Promise<
         }
 
         // Add user-agent header
-        if(headers["User-Account"] == undefined) headers["User-Account"] = "OpenWilma/1.0.0"
+        if(headers["User-Agent"] == undefined) headers["User-Agent"] = "OpenWilma/1.0.0"
 
         // Perform request through axios
         let req = axios({
