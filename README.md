@@ -105,7 +105,7 @@ For browsers (make sure to correct paths, if needed):
 ```
 
 ## Common errors
-- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" Wilma servers. It does not matter if your server is not "offical", it may still work. You just need to bypass the server check by adding one more argument to the .login() function. You need to add "false", which would look like this:
+- ```No such wilma server available```, This means that the server you are trying to connect is not on the list of "offical" Wilma servers. It does not matter if your server is not "official", it may still work. You just need to bypass the server check by adding one more argument to the .login() function. You need to add "false", which would look like this:
 ```js
     //Pro tip: <OpenWilma> is known as "api" in the quick start
     <OpenWilma>.login("https://my_wilma_server.inschool.fi", "my_username", "my_secure_password", false)
