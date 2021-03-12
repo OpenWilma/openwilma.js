@@ -10,6 +10,6 @@ export interface WilmaAccount {
     name: string,
     role: WilmaRole,
     id: string,
-    code: string|null,
-    class: string|null
+    code?: string,
+    class?: string
 }

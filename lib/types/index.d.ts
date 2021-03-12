@@ -14,7 +14,7 @@ export interface WilmaSession {
     id: string,
     formkey: string,
     secret: string,
-    slug: string|null,
+    slug?: string,
     server: string
 }
 
