@@ -11,14 +11,14 @@ import Errors from "../../utils/error"
 
 export default class ProfileManager {
     session: WilmaSession
-    constructor(session: WilmaSession){
+    constructor(session: WilmaSession) {
         this.session = session
     }
 
     /**
      * List all profiles
      */
-    async list(){
+    async list() {
 
     }
 
@@ -27,7 +27,7 @@ export default class ProfileManager {
      * @param type The profile type
      * @param id The profile id
      */
-    async get(type: WilmaRole, id: string){
+    async get(type: WilmaRole, id: string) {
         try {
             // Convert to numbers
             let con: any = {
@@ -35,16 +35,16 @@ export default class ProfileManager {
                 "student": "students",
                 "staff": "personnel"
             }
-            if(con[type] == undefined){
+            if(con[type] === undefined) {
                 throw new Errors.WAPIError("This API does not support that role")
-            }else {
+            } else {
                 // Now we know we are looking for actual people and not rooms or items
                 apiRequest.get({
                     session: this.session
                 })
             }
         }
-        catch(err){
+        catch(err) {
             throw new Errors.WAPIError(err)
         }
     }

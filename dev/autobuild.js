@@ -8,8 +8,8 @@ let hold = false
 
 const compile = async () => {
     hold = true
-    if(Object.keys(shells).length != 0){
-        for(let shell in shells){
+    if(Object.keys(shells).length != 0) {
+        for(let shell in shells) {
             shells[shell].kill("SIGKILL")
         }
     }
@@ -23,7 +23,7 @@ const compile = async () => {
         stderrCache += data
     })
     sh.on("exit", async (code, signal) => {
-        if(code != 0){
+        if(code != 0) {
             try {
                 // Flush some useless stuff out
                 stderrCache = stderrCache.split("Error:")
@@ -37,11 +37,11 @@ const compile = async () => {
                 console.log(stderrCache)
                 hold = false
             }
-            catch(err){
+            catch(err) {
                 console.log("Build failed and error message parser failed.")
                 hold = false
             }
-        }else if(signal != "SIGKILL"){
+        } else if(signal != "SIGKILL") {
             console.log("\x1b[32mBuilt!\x1b[0m")
             hold = false
         }
@@ -49,8 +49,8 @@ const compile = async () => {
 }
 
 fs.watch("./", {recursive: true}, async (event, filename) => {
-    if(hold){
-        if(filename != null && filename.startsWith("dist")){
+    if(hold) {
+        if(filename != null && filename.startsWith("dist")) {
             console.log("\x1b[34m   Compiled " + filename + "\x1b[0m")
         }
         return

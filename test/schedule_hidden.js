@@ -1,9 +1,9 @@
 function _typeof(e) {
-    return (_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(e) {
+    return (_typeof = "function" === typeof Symbol && "symbol" === typeof Symbol.iterator ? function(e) {
         return typeof e
     }
     : function(e) {
-        return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e
+        return e && "function" === typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e
     }
     )(e)
 }
@@ -231,7 +231,7 @@ var FrontpageSchedule = {
                     }),
                     FrontpageSchedule.elements.wtConfirmRemoveDialog.modal("hide"),
                     notificationsSave(e.message),
-                    FrontpageSchedule.elements.sidePanel.hide()) : "string" == typeof e.message ? FrontpageSchedule.showErrors(e.message.split("\r\n")) : FrontpageSchedule.showErrors(e.errors)
+                    FrontpageSchedule.elements.sidePanel.hide()) : "string" === typeof e.message ? FrontpageSchedule.showErrors(e.message.split("\r\n")) : FrontpageSchedule.showErrors(e.errors)
                 } catch (e) {
                     FrontpageSchedule.showErrors([e])
                 }
@@ -744,7 +744,7 @@ var FrontpageSchedule = {
                         FrontpageSchedule.changeDay(FrontpageSchedule.selectedDay, FrontpageSchedule.selectedMonth, FrontpageSchedule.selectedYear, !1)
                     }),
                     notificationsSave(e.message),
-                    FrontpageSchedule.elements.sidePanel.hide()) : "string" == typeof e.message ? FrontpageSchedule.showErrors(e.message.split("\r\n")) : FrontpageSchedule.showErrors(e.errors)
+                    FrontpageSchedule.elements.sidePanel.hide()) : "string" === typeof e.message ? FrontpageSchedule.showErrors(e.message.split("\r\n")) : FrontpageSchedule.showErrors(e.errors)
                 } catch (e) {
                     FrontpageSchedule.showErrors([e])
                 }
@@ -803,7 +803,7 @@ var FrontpageSchedule = {
                     FrontpageSchedule.dataLayers = n,
                     FrontpageSchedule.role = e.Role,
                     FrontpageSchedule.addAppointments = e.AddAppt,
-                    "function" == typeof a && a()
+                    "function" === typeof a && a()
                 } catch (e) {
                     alert(e.message)
                 }
@@ -1130,7 +1130,7 @@ var FrontpageSchedule = {
                 FrontpageSchedule.changeDay(FrontpageSchedule.selectedDay, FrontpageSchedule.selectedMonth, FrontpageSchedule.selectedYear, !0)
             }, 0),
             FrontpageSchedule.skipChangeMonthYear = !1,
-            "function" == typeof n && n(e)
+            "function" === typeof n && n(e)
         }))
     },
     markEvents: function() {

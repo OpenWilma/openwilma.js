@@ -15,7 +15,7 @@ import { WilmaTeacher } from "../../types/teacher"
  */
 export default class ExamManager {
     session: WilmaSession
-    constructor(session: WilmaSession){
+    constructor(session: WilmaSession) {
         this.session = session
     }
 
@@ -29,10 +29,10 @@ export default class ExamManager {
                 session: this.session,
                 endpoint: "/overview"
             })
-            if(exams.status == 200){
+            if(exams.status === 200) {
                 let json = exams.data.Exams
                 let built: WilmaExam[] = []
-                for(let exam of json){
+                for(let exam of json) {
                     // Convert date
                     let date = new Date()
                     date.setFullYear(exam.Date.split("-")[0])
@@ -40,7 +40,7 @@ export default class ExamManager {
                     date.setDate(exam.Date.split("-")[2])
 
                     // Convert teachers
-                    let teachers: WilmaTeacher[] = exam.Teachers.map((t: any) => ({
+                    const teachers: WilmaTeacher[] = exam.Teachers.map((t: any) => ({
                         id: t.TeacherId,
                         name: t.TeacherName,
                         code: t.TeacherCode
@@ -62,11 +62,11 @@ export default class ExamManager {
                     })
                 }
                 return built
-            }else {
+            } else {
                 throw new Errors.WAPIServerError(exams.data.error)
             }
         }
-        catch(err){
+        catch(err) {
             throw new Errors.WAPIError(err)
         }
     }

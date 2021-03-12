@@ -17,7 +17,7 @@ export default class MessageManager {
     session: WilmaSession
     categories: WilmaMessageLocation[]
     types: any
-    constructor(session: WilmaSession){
+    constructor(session: WilmaSession) {
         this.session = session
         this.categories = [ // All available categories
             "archive",
@@ -42,15 +42,15 @@ export default class MessageManager {
      */
     async list(category: WilmaMessageLocation): Promise<WilmaMessage[]>{
         try {
-            if(this.categories.includes(category)){
+            if(this.categories.includes(category)) {
                 let messages = await apiRequest.get({
                     session: this.session,
-                    endpoint: "/messages/list" + (category == "inbox" ? "" : "/" + (category == "sent" ? "outbox" : category)) // The index category does not require a path & sent -> outbox
+                    endpoint: "/messages/list" + (category === "inbox" ? "" : "/" + (category === "sent" ? "outbox" : category)) // The index category does not require a path & sent -> outbox
                 })
-                if(messages.status == 200){
+                if(messages.status === 200) {
                     // Parse
                     let built: WilmaMessage[] = []
-                    for(let message of messages.data.Messages){
+                    for(let message of messages.data.Messages) {
                         // Skip appointments
                         if(message.IsEvent === true) continue
                         // Construct date
@@ -65,9 +65,9 @@ export default class MessageManager {
 
                         // Convert author type
                         let type: WilmaRole = "generic"
-                        for(let key of Object.keys(this.types)){
+                        for(let key of Object.keys(this.types)) {
                             let key_: any = key // I hate this
-                            if(this.types[key_] == message.SenderType){
+                            if(this.types[key_] === message.SenderType) {
                                 type = key_
                             }
                         }
@@ -75,12 +75,12 @@ export default class MessageManager {
                         let code = null
                         let class_ = null
                         let name = message.Sender
-                        if(name.includes("(") && name.endsWith(")")){
+                        if(name.includes("(") && name.endsWith(")")) {
                             // We have a code
                             code = name.split(" (")[1].replace(")", "")
                             name = name.replace(" " + code, "")
                         }
-                        if(name.includes(", ")){
+                        if(name.includes(", ")) {
                             class_ = name.split(", ")[1].trim()
                             name = name.split(", " + class_, "")
                         }
@@ -103,14 +103,14 @@ export default class MessageManager {
                         })
                     }
                     return built
-                }else {
+                } else {
                     throw new Errors.WAPIError("Unexpected response from Wilma server")
                 }
-            }else {
+            } else {
                 throw new Errors.WAPIError("No such message category")
             }
         }
-        catch(err){
+        catch(err) {
             throw new Errors.WAPIError(err)
         }
     }
@@ -118,31 +118,31 @@ export default class MessageManager {
     /**
      * List all available recipients
      */
-    async listRecipients(){
+    async listRecipients() {
         try {
             // Note: This list is incomplete! Some stuff may be missing, but these are all we can get. API limitations are the root cause.
             let recipients = await apiRequest.get({
                 session: this.session,
                 endpoint: "/messages/recipients/?select_recipients"
             })
-            if(recipients.status == 200){
+            if(recipients.status === 200) {
                 let built: WilmaAccount[] = []
                 // Guardians
-                if(recipients.data.GuardianRecords != undefined){
-                    for(let guardian of recipients.data.GuardianRecords){
+                if(recipients.data.GuardianRecords != undefined) {
+                    for(let guardian of recipients.data.GuardianRecords) {
                         // TODO
                         built.push({
                             id: guardian.Id,
                             name: guardian.Caption,
-                            role: 
+                            role: ""
                         })
                     }
                 }
-            }else {
+            } else {
                 throw new Errors.WAPIError("Unexpected response server response")
             }
         }
-        catch(err){
+        catch(err) {
             throw new Errors.WAPIError(err)
         }
     }
@@ -150,21 +150,21 @@ export default class MessageManager {
     /**
      * Get message by id
      */
-    async get(){
+    async get() {
 
     }
 
     /**
      * Create a new message draft
      */
-    async create(){
+    async create() {
 
     }
 
     /**
      * Send a message draft
      */
-    async send(){
+    async send() {
 
     }
 }

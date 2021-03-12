@@ -7,14 +7,14 @@ export async function listServers(): Promise<WilmaServer[]> {
         let servers: RequestResponse = await request.get({
             url: "https://www.starsoft.fi/wilmat/wilmat.json"
         });
-        if(servers.status == 200){
+        if(servers.status === 200) {
             let list: WilmaServer[] = servers.data.wilmat
             return list
-        }else {
+        } else {
             throw new Errors.SAPIError("Unexpected server response from Starsoft server list.")
         }
     }
-    catch(err){
+    catch(err) {
         throw new Error(err);
     }
 }

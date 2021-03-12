@@ -29,15 +29,15 @@ class OpenWilmaCore {
 	async login(account: WilmaAccountConfiguration, validateServer: boolean, versionCheck: boolean) : Promise<void | WilmaAccountInstance> {
 		try {
 			// Validate server
-			if(validateServer != false){
+			if(validateServer != false) {
 				let servers: WilmaServer[] = await listServers()
-				let result = servers.find(({url, formerUrl}) => url === account.server || formerUrl == account.server);
+				let result = servers.find(({url, formerUrl}) => url === account.server || formerUrl === account.server);
 				if(result !== undefined) {
 					// Warn about the possible usage of an old url
-					if(result.formerUrl === account.server){
+					if(result.formerUrl === account.server) {
 						warn("Supplied an old URL for a Wilma Server. Please use \"" + result.url + "\" in the future to access the \"" + result.name + "\" Wilma server.", "UsedFormerURL")
 					}
-				}else {
+				} else {
 					throw new Errors.WAPIError("No such Wilma server available as: \"" + account.server + "\". If you are trying to connect to an unofficial Wilma server, disable server validation (more information in the OpenWilma documentation).")
 				}
 			}
@@ -47,12 +47,12 @@ class OpenWilmaCore {
 				const WilmaServer: RequestResponse = await apiRequest.get({
 					url: account.server + "/index_json"
 				})
-				if(WilmaServer.status == 200){
+				if(WilmaServer.status === 200) {
 					// Check API version
-					if(!supportedVersions.includes(WilmaServer.data.ApiVersion)){
-						if(versionCheck !== true){
+					if(!supportedVersions.includes(WilmaServer.data.ApiVersion)) {
+						if(versionCheck !== true) {
 							throw new Errors.WAPIError("Unsupported Wilma server. You can disable this check by setting versionCheck to false (more information in the OpenWilma documentation).")
-						}else {
+						} else {
 							warn("Version check disabled.", "Version support")
 						}
 					}
@@ -70,9 +70,9 @@ class OpenWilmaCore {
 							{name: "Content-Type", value: "application/x-www-form-urlencoded"}
 						],
 						redirect: false,
-						statusCheck: (num) => {return num == 303}
+						statusCheck: (num) => {return num === 303}
 					})
-					if(req.status == 303){
+					if(req.status === 303) {
 						// Good response
 						if(req.headers['set-cookie']) {
 							let sessionValue = null // The session id
@@ -95,48 +95,47 @@ class OpenWilmaCore {
 									{name: "Cookie", value: "Wilma2SID=" + sessionValue}
 								]
 							})
-							if(creds.status == 200){
+							if(creds.status === 200) {
 								// Parse secret and formkey from URL
 								try {
 									let secret: string = creds.data.split("name=\"secret\" value=\"")[1].split("\"")[0]
 									let formkey: string = creds.data.split("name=\"formkey\" value=\"")[1].split("\"")[0]
-									if(secret && formkey){
+									if(secret && formkey) {
 										// We got all credentials
 										// Build session
 										let session: WilmaSession = {
 											id: sessionValue,
 											secret: secret,
 											formkey: formkey,
-											server: account.server,
-											slug: null
+											server: account.server
 										}
 										return new WilmaAccountInstance(session)
-									}else {
+									} else {
 										throw new Errors.WAPIParserError("Credentials response parser returned undefined for formkey or secret.")
 									}
 								}
-								catch(err){
+								catch(err) {
 									throw new Errors.WAPIParserError("Failed to parse secondary credentials from messages response.")
 								}
-							}else {
+							} else {
 								throw new Errors.WAPIAuthError("Failed to fetch secondary credentials.")
 							}
-						}else {
+						} else {
 							throw new Errors.WAPIAuthError("SessionID cookie expected in response body.")
 						}
 						// Check login result
 					} else {
 						throw new Errors.WAPIServerError(req.data.error)
 					}
-				}else {
+				} else {
 					throw new Errors.WAPIServerError(WilmaServer.data.error)
 				}
 			}
-			catch(err){
+			catch(err) {
 				throw new Errors.APIRequestError(err)
 			}
 		}
-		catch(err){
+		catch(err) {
 			throw new Error(err)
 		}
 	}
@@ -147,17 +146,17 @@ class OpenWilmaCore {
  */
 class WilmaAccountInstance {
 	session: WilmaSession
-	constructor(session: WilmaSession){
+	constructor(session: WilmaSession) {
 		this.session = session
 	}
 
 	/* Exams */
-	get exams(){
+	get exams() {
 		return new ExamManager(this.session)
 	}
 
 	/* Messages */
-	get messages(){
+	get messages() {
 		return new MessageManager(this.session)
 	}
 }

@@ -7,27 +7,27 @@
 export default class MessageEntity {
     
     
-    async archive(){
+    async archive() {
 
     }
 
-    async unarchive(){
+    async unarchive() {
 
     }
 
-    async delete(){
+    async delete() {
 
     }
 
-    async edit(){
+    async edit() {
 
     }
 
-    async recall(){
+    async recall() {
 
     }
 
-    async reply(){
+    async reply() {
 
     }
 }
