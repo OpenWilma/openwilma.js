@@ -372,6 +372,7 @@ class Parser {
         }
     }
     toRoom(data){
+        if(data.kortti == undefined || data.lyhenne == undefined || data.nimi == undefined) return null
         return {
             id: data.kortti,
             shortName: data.lyhenne,
@@ -379,6 +380,7 @@ class Parser {
         }
     }
     toTeacher(data){
+        if(data.kortti == undefined || data.lyhenne == undefined || data.nimi == undefined) return null
         return {
             id: data.kortti,
             callsign: data.lyhenne,
