@@ -28,7 +28,8 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts",
     "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib",
-    "autobuild": "node ./dev/autobuild.js"
+    "autobuild": "node ./dev/autobuild.js",
+    "test": "rollup -c rollup.config.ts && node test/test.js"
   },
   "dependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.0",
