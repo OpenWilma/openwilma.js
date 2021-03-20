@@ -10,7 +10,7 @@ import Errors from "../../utils/error"
 import { WilmaExam } from "../../types/exam"
 import { WilmaTeacher } from "../../types/teacher"
 
-export default class ExamManager{
+export default class ExamManager {
     session: WilmaSession
     constructor(session: WilmaSession){
         this.session = session

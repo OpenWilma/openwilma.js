@@ -9,6 +9,7 @@ export type RequestHeader = {
 
 export interface RequestOptions {
     url?: string,
+    ignoreSlug?: boolean
     headers?: Array<RequestHeader>,
     body?: string|any,
     timeout?: number,
