@@ -87,6 +87,7 @@ class OpenWilmaCore {
 							if(!sessionValue) {
 								throw new Errors.WAPIAuthError("Sign in failed, invalid username or password?")
 							}
+							// TODO before attempting to get anything else, CHECK IF THIS ACCOUNT SHOULD SELECT ROLES!
 							// SessionID is now valid. Get secret and formkey
 							const creds = await apiRequest.get({
 								url: account.server + "/messages",
