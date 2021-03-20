@@ -11,6 +11,9 @@ const ses = new op.client()
 ses.login(testCredentials, false).then(async account => {
 	console.log("Logged in")
 	console.log(account)
+	if (account.roleRequired) {
+		console.log("Role must be selected before continuing!");
+	}
 	let exams = await account.exams.list()
 	console.log(exams)
 }).catch(err => {

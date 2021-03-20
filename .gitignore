@@ -15,3 +15,5 @@ node_modules
 # Build output
 dist/
 test/test.config.json
+
+package-lock.json
