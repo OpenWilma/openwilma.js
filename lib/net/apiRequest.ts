@@ -129,7 +129,7 @@ export async function request(method: string, options: RequestOptions): Promise<
             timeout: options.timeout === undefined ? 30000 : options.timeout,
             headers: headers,
             maxRedirects: options.redirect === false ? 0 : 10,
-            validateStatus: options.statusCheck,
+            validateStatus: options.statusCheck != undefined ? options.statusCheck : async () => {return true}, // Special thing here: OpenWilma will check the status, not Axios (by default)
         })
         req.catch((err: Error) => {
             throw new Errors.APIRequestPostflightError(err)
