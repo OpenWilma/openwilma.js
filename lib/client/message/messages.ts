@@ -8,7 +8,7 @@ import apiRequest from "../../net/apiRequest"
 import { WilmaSession } from "../../types"
 import Errors from "../../utils/error"
 import { WilmaMessage, WilmaMessageLocation } from "../../types/message"
-import { WilmaAccount, WilmaRole } from "../../types/account"
+import { WilmaProfile, WilmaRole, TypesConversion} from "../../types/profiles"
 
 /**
  * Account messages manager class
@@ -17,6 +17,7 @@ export default class MessageManager {
     session: WilmaSession
     categories: WilmaMessageLocation[]
     types: any
+    typesConversion: TypesConversion
     constructor(session: WilmaSession) {
         this.session = session
         this.categories = [ // All available categories
@@ -25,14 +26,17 @@ export default class MessageManager {
             "sent",
             "inbox"
         ]
-        this.types = {
+        this.types = { // Account types
             "teacher": 1,
             "student": 2,
             "staff": 3,
-            "parent": 4,
+            "guardian": 4,
             "workplace-instructor": 5,
             "management": 6,
             "generic": 7,
+        }
+        this.typesConversion = { // Convert odd api responses to standard types
+            "r_guardian": "guardian"
         }
     }
 
@@ -86,7 +90,7 @@ export default class MessageManager {
                         }
 
                         // Make author
-                        let a: WilmaAccount = {
+                        let a: WilmaProfile = {
                             id: message.SenderId,
                             role: type,
                             name: name,
@@ -126,18 +130,46 @@ export default class MessageManager {
                 endpoint: "/messages/recipients/?select_recipients"
             })
             if(recipients.status === 200) {
-                let built: WilmaAccount[] = []
+                let built: WilmaProfile[] = []
                 // Guardians
                 if(recipients.data.GuardianRecords != undefined) {
                     for(let guardian of recipients.data.GuardianRecords) {
-                        // TODO
+                        let role: WilmaRole = guardian.Role != undefined ? this.typesConversion[guardian.Role] : "generic"
                         built.push({
                             id: guardian.Id,
                             name: guardian.Caption,
-                            role: ""
+                            role: role
                         })
                     }
                 }
+
+                // Complete list
+                let handleProfile = async (data: any) => {
+                    let ids: number[] = await data.SchoolIDs.split(",").map((i: string) => parseInt(i))
+                    let name = data.Caption.split("(")[0].trimRight()
+                    let code = data.Caption.split("(")[1].split(")")[0]
+                    let role: WilmaRole = "unknown" // How could we get this?
+
+                    // TODO: We need to query the profiles api here, to get more details!!
+
+                    return {
+                        id: data.Id,
+                        name: name,
+                        code: code,
+                        schoolIds: ids,
+                        role: role
+                    }
+                }
+                for(let record of recipients.data.IndexRecords){
+                    for(let ar in record){
+                        if(Array.isArray(record[ar])){
+                            for(let item of record[ar]){
+                                built.push(await handleProfile(item))
+                            }
+                        }
+                    }
+                }
+                console.log(built)
             } else {
                 throw new Errors.WAPIError("Unexpected response server response")
             }

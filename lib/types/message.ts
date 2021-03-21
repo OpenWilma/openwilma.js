@@ -1,4 +1,4 @@
-import { WilmaAccount } from "./account"
+import { WilmaProfile } from "./profiles"
 
 /**
  * Wilma message entity location
@@ -12,6 +12,6 @@ export interface WilmaMessage {
     title: string,
     timestamp: Date,
     location: WilmaMessageLocation,
-    author: WilmaAccount,
+    author: WilmaProfile,
     id: string
 }

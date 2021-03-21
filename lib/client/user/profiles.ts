@@ -6,7 +6,7 @@
 
 import apiRequest from "../../net/apiRequest"
 import { WilmaSession } from "../../types"
-import { WilmaAccount, WilmaRole } from "../../types/account"
+import { WilmaProfile, WilmaRole } from "../../types/profiles"
 import Errors from "../../utils/error"
 
 export default class ProfileManager {
