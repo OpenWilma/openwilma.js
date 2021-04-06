@@ -4,7 +4,7 @@
  
 ---
 
-A Node.JS and Browser CommonJS and ES library for the public Wilma API written in TypeScript.
+A Node.JS and Browser CommonJS library for the public Wilma API written in TypeScript.
 
 ### This is the 1.0 version of the library, which is undergoing heavy development. Use at your own risk!
 
