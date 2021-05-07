@@ -19,7 +19,7 @@ const login = async (
 
     if (server.status !== 200) {
         throw new Errors.WAPIError(
-            `Wilma server did not responded with ${server.status}.`
+            `Wilma server responded with ${server.status}.`
         )
     }
 
