@@ -1,12 +1,18 @@
 const supportedVersions = [11] // The supported Wilma API versions
+
 import {WilmaSession, WilmaAccountConfiguration} from "./types"
+import {WilmaServer} from "./types/starsoft"
+import { RequestResponse } from "./types/apiRequest"
+
+import apiRequest from "./net/apiRequest"
+import ExamManager from "./account/managers/exams"
+
 import Errors from "./utils/error"
-import {listServers} from "./starsoft/servers"
-import {WilmaServer} from "./types/starsoft";
 import warn from "./utils/warn"
-import apiRequest from "./net/apiRequest";
-import { RequestResponse } from "./types/apiRequest";
-import ExamManager from "./client/exam/exams";
+import {listServers} from "./starsoft/servers"
+
+
+
 /**
  *
  * This is the Javascript version of the OpenWilma project.
