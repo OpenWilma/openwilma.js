@@ -1,67 +1,64 @@
-/**
- * OpenWilma.JS Exams functionality
- * 
- * By: @Esinko
- */
-
 import apiRequest from "../../net/apiRequest"
+import Errors from "../../util/error"
+
 import { WilmaSession } from "../../types"
-import Errors from "../../utils/error"
 import { WilmaExam } from "../../types/exam"
 import { WilmaTeacher } from "../../types/teacher"
 
-export default class ExamManager{
+
+export default class ExamManager {
     session: WilmaSession
+
     constructor(session: WilmaSession){
         this.session = session
     }
 
-    async list(){
-        try {
-            // Get exams that have not yet concluded
-            const exams = await apiRequest.get({
-                session: this.session,
-                endpoint: "/overview"
-            })
-            if(exams.status == 200){
-                let json = exams.data.Exams
-                let built: WilmaExam[] = []
-                for(let exam of json){
-                    // Convert date
-                    let date = new Date()
-                    date.setFullYear(exam.Date.split("-")[0])
-                    date.setMonth(exam.Date.split("-")[1])
-                    date.setDate(exam.Date.split("-")[2])
+    async list(): Promise<Array<WilmaExam>> {
+        // Get exams that have not yet concluded
+        const examsResponse = await apiRequest.get({
+            session: this.session,
+            endpoint: "/overview"
+        })
 
-                    // Convert teachers
-                    let teachers: WilmaTeacher[] = exam.Teachers.map((t: any) => ({
-                        id: t.TeacherId,
-                        name: t.TeacherName,
-                        code: t.TeacherCode
-                    }))
+        if (examsResponse.status !== 200) {
+            throw new Errors.WAPIServerError(examsResponse.data.error)
+        }
 
-                    // Build object
-                    built.push({
-                        id: exam.ExamId,
-                        course: {
-                            name: exam.Course,
-                            id: exam.CourseId,
-                            description: exam.CourseTitle,
-                            teachers: teachers
-                        },
-                        name: exam.Name,
-                        description: exam.Info,
-                        grade: exam.grade != undefined ? exam.grade : null,
-                        date: date
-                    })
-                }
-                return built
-            }else {
-                throw new Errors.WAPIServerError(exams.data.error)
+        const exams = examsResponse.data.Exams
+
+        return exams.map((e: any) => {
+            const {
+                Teachers: jsonTeachers,
+                Date: jsonDate,
+            } = e
+
+            const [ year, month, day ] = jsonDate.split("-")
+
+            const date = new Date()
+            date.setFullYear(year)
+            date.setMonth(month)
+            date.setDate(day)
+
+            const teachers: Array<WilmaTeacher> = jsonTeachers
+                .map((t: any) => ({
+                    id: t.TeacherId,
+                    name: t.TeacherName,
+                    code: t.TeacherCode
+                }))
+
+            return {
+                id: e.ExamId,
+                course: {
+                    name: e.Course,
+                    id: e.CourseId,
+                    description: e.CourseTitle,
+                    teachers
+                },
+                name: e.Name,
+                description: e.Info,
+                grade: e.grade ?? null,
+                date: date
             }
-        }
-        catch(err){
-            throw new Errors.WAPIError(err)
-        }
+        })
     }
 }
