@@ -56,7 +56,7 @@ export default class ExamManager {
                 },
                 name: e.Name,
                 description: e.Info,
-                grade: e.grade ?? null,
+                grade: e.Grade ?? null,
                 date: date
             }
         })
