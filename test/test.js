@@ -1,24 +1,32 @@
-// Module testing, CommonJS
-let op = require("../dist/index.js")
+/* eslint-disable @typescript-eslint/no-var-requires */
 
-// Get cred
-const username = process.argv[2]
-const password = process.argv[3]
-const server = process.argv[4]
+const { loginToWilma } = require("../dist/index.js")
+const path = require("path")
 
-const ses = new op.client()
-
-// akuli TestiSalasana <server ;)>
-
-ses.login({
-	username: username,
-	password: password,
-	server: server
-}, false).then(async account => {
-	console.log("Logged in")
-	console.log(account)
-	let exams = await account.exams.list()
-	console.log(exams)
-}).catch(err => {
-	console.error(err)
+// todo: use path.join()
+require("dotenv").config({
+    path: path.join(__dirname, "/.test.env")
 })
+
+const server = process.env.WILMA_SERVER
+const username = process.env.WILMA_USERNAME
+const password = process.env.WILMA_PASSWORD
+
+loginToWilma({
+    server,
+    username,
+    password,
+})
+    .then(async (account) => {
+        console.log("Logged in")
+
+        const user = await account.getUser()
+
+        console.log(user)
+
+        const exams = await user.exams.list()
+
+        console.log(exams)
+
+    })
+    .catch(console.log)

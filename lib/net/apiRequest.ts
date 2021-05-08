@@ -4,7 +4,7 @@ const axios = require("axios")
 
 // Typings
 import {RequestHeader, RequestOptions, RequestResponse} from "../types/apiRequest"
-import Errors from "../utils/error"
+import Errors from "../util/error"
 
 // Functions
 
@@ -115,6 +115,11 @@ export async function request(method: string, options: RequestOptions): Promise<
             if(options.session != null){
                 if(options.body.formkey == undefined) options.body.formkey = options.session.formkey
                 if(options.body.secret == undefined) options.body.secret = options.session.secret
+
+                if (options.session.slug) {
+                    // We will hope that it replaces the first match
+                    options.url.replace("/", `/!${options.session.slug}/`)
+                }
             }
         }
 

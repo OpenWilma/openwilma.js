@@ -1,7 +1,7 @@
 {
   "name": "openwilma",
   "version": "1.0.0",
-  "description": "JavaScript Library for OpenWilma",
+  "description": "a JavaScript library for Wilma",
   "license": "GPL-2.0",
   "umdName": "OpenWilma_Js",
   "libraryFile": "index",
@@ -14,8 +14,9 @@
     "@types/typescript": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
+    "dotenv": "^9.0.0",
     "eslint": "^7.20.0",
-    "jsdoc": "^3.6.6",
+    "jsdoc": "^0.0.0",
     "minami": "^1.2.3",
     "rollup": "^2.23.1",
     "rollup-plugin-commonjs": "^10.1.0",
@@ -28,7 +29,8 @@
   "scripts": {
     "build": "rollup -c rollup.config.ts",
     "generate-docs": "node_modules/.bin/jsdoc --destination docs --configure .jsdoc.json --readme README.md --verbose lib",
-    "autobuild": "node ./dev/autobuild.js"
+    "autobuild": "node ./dev/autobuild.js",
+    "test": "node ./test/test.js"
   },
   "dependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.0",
