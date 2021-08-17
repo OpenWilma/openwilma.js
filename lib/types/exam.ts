@@ -2,10 +2,10 @@
  * Typings for exams
  */
 
-import { WilmaGroup } from "./group";
+import {WilmaGroup} from "./group";
 
 /**
- * Wilma Exam entity 
+ * Wilma Exam entity
  */
 export interface WilmaExam {
     id: String,

@@ -1,4 +1,4 @@
-/** 
+/**
  * Wilma teacher entity
  */
 export interface WilmaTeacher {

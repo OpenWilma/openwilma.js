@@ -1,9 +1,8 @@
-
 /**
  * User type
  */
 export enum UserType {
-    TEACHER=1,
+    TEACHER = 1,
     STUDENT,
     STAFF,
     GUARDIAN,
@@ -16,10 +15,10 @@ export enum UserType {
  * User details such as name, school, etc should be stored here.
  */
 export class User {
-    name: string|null
+    name: string | null
     type: UserType
     id: number
-    school: string|null
+    school: string | null
 
     constructor(name: string | null, type: UserType, id: number, school: string | null) {
         this.name = name;

@@ -1,32 +1,33 @@
 /**
  * OpenWilma.JS Exams functionality
- * 
+ *
  * By: @Esinko
  */
 
 import apiRequest from "../../net/apiRequest"
-import { WilmaSession } from "../../types"
+import {WilmaSession} from "../../types"
 import Errors from "../../utils/error"
-import { WilmaExam } from "../../types/exam"
-import { WilmaTeacher } from "../../types/teacher"
+import {WilmaExam} from "../../types/exam"
+import {WilmaTeacher} from "../../types/teacher"
 
 export default class ExamManager {
     session: WilmaSession
-    constructor(session: WilmaSession){
+
+    constructor(session: WilmaSession) {
         this.session = session
     }
 
-    async list(){
+    async list() {
         try {
             // Get exams that have not yet concluded
             const exams = await apiRequest.get({
                 session: this.session,
                 endpoint: "/overview"
             })
-            if(exams.status == 200){
+            if (exams.status == 200) {
                 let json = exams.data.Exams
                 let built: WilmaExam[] = []
-                for(let exam of json){
+                for (let exam of json) {
                     // Convert date
                     let date = new Date()
                     date.setFullYear(exam.Date.split("-")[0])
@@ -56,11 +57,10 @@ export default class ExamManager {
                     })
                 }
                 return built
-            }else {
+            } else {
                 throw new Errors.WAPIServerError(exams.data.error)
             }
-        }
-        catch(err){
+        } catch (err) {
             throw new Errors.WAPIError(err)
         }
     }

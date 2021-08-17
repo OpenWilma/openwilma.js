@@ -1,7 +1,6 @@
 // Placeholder
 
 import {WilmaSession} from "../../types";
-import {User} from "../../types/user";
 import apiRequest from "../../net/apiRequest";
 import Errors from "../../utils/error";
 import {userMustSelectProfile} from "../../parser/profiles";

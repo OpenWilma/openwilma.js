@@ -1,4 +1,5 @@
 import {Profile} from "../types/profile";
+
 let cheerio = require('cheerio');
 
 /**
@@ -7,6 +8,7 @@ let cheerio = require('cheerio');
  */
 export function parseProfiles(homepageHtml: string): Profile[] {
     // TODO
+
     return [];
 }
 

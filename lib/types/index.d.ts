@@ -14,7 +14,7 @@ export interface WilmaSession {
     id: string,
     formkey: string,
     secret: string,
-    slug: string|null,
+    slug: string | null,
     server: string
 }
 
@@ -26,8 +26,8 @@ export interface WilmaSession {
  */
 export interface WilmaAccountConfiguration {
     username: string,
-	password: string
-	server: string
+    password: string
+    server: string
 }
 
 /**
