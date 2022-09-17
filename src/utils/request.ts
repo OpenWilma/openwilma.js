@@ -27,6 +27,7 @@ const fetchWrapperRequest = {
 const fetchWrapper: requestWrapper = {
     request: (url: string, options: any, callback: (arg0: requestWrapperResponse) => void): requestWrapperRequest => {
         let headers: requestHeaders = {}
+        let responseHeaders: responseHeaders = {}
         const written: Buffer[] = []
         let ended = false
         const eventFunctions: requestWrapperRequestEvent[] = []
@@ -34,13 +35,13 @@ const fetchWrapper: requestWrapper = {
             eventFunctions.push({ event, callback })
         }
         let statusCode = 0
-        callback({ on, once: on, headers, statusCode }) // Yeah... deal with it
+        callback({ on, once: on, headers: responseHeaders, statusCode }) // Yeah... deal with it
         return {
             end: () => {
                 if (ended) throw new Error("Request already closed")
                 ended = true
                 fetchWrapperRequest.end(url, options, written, headers, eventFunctions).then((data) => {
-                    headers = data.headers
+                    responseHeaders = data.headers
                     statusCode = data.statusCode
 
                     // Fake the response end, this is a guaranteed "once" event
@@ -66,15 +67,18 @@ const fetchWrapper: requestWrapper = {
 /**
  * Request utility
  */
-export async function request(method: string, url: string | import("url").URL, headers: requestHeaders, body: string, options: requestOptions): Promise<requestResponse> {
-    return new Promise((resolve, reject) => {
+export async function request(method: string, url: string | import("url").URL, options?: requestOptions): Promise<requestResponse> {
+    return new Promise(async (resolve, reject) => {
+        const headers = options?.headers ?? {}
+        const body = options?.body
+
         // Construct target url
         let targetUrl
         if (!options?.overrideURLValidation && !(url instanceof URL)) {
             try {
                 targetUrl = new URL(url)
             } catch (error) {
-                reject(new URLParsingError(`Failed to parse given URL: ${error}`))
+                reject(new Error(`Failed to parse given URL: ${error}`))
             }
         } else {
             targetUrl = url
@@ -87,8 +91,11 @@ export async function request(method: string, url: string | import("url").URL, h
         } else {
             // Node.JS environment
             const protocol = typeof url !== "string" ? url.protocol.toLowerCase().split(":")[0] : url.toLowerCase().split(":")[0]
-            if (!["http", "https"].includes(protocol)) reject(new URLParsingError("Unsupported protocol"))
-            lib = require(protocol)
+            if (!["http", "https"].includes(protocol)) {
+                reject(new Error("Unsupported protocol"))
+                return
+            }
+            lib = await import(protocol)
         }
 
         // Make the request
@@ -98,7 +105,7 @@ export async function request(method: string, url: string | import("url").URL, h
             res.once("end", () => resolve({
                 status: res.statusCode,
                 headers: res.headers,
-                data: options?.stringify ? options?.json ? JSON.parse(Buffer.concat(buffer).toString()) : Buffer.concat(buffer).toString() : Buffer.concat(buffer)
+                data: options?.stringify || options?.json ? options?.json ? JSON.parse(Buffer.concat(buffer).toString()) : Buffer.concat(buffer).toString() : Buffer.concat(buffer)
             }))
         })
 
