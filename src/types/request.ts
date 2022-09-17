@@ -1,8 +1,10 @@
 interface requestOptions {
-    overrideContentLength: boolean,
-    overrideURLValidation: boolean,
-    stringify: boolean,
-    json: boolean
+    overrideContentLength?: boolean,
+    overrideURLValidation?: boolean,
+    stringify?: boolean,
+    json?: boolean,
+    headers?: requestHeaders,
+    body?: string, 
 }
 
 interface requestHeaders {
@@ -10,13 +12,13 @@ interface requestHeaders {
 }
 
 interface responseHeaders {
-    [key: string]: string
+    [key: string]: string | string[]
 }
 
 interface requestResponse {
     status: number,
     headers: responseHeaders,
-    data: Buffer | String | Object
+    data: Buffer | string | Object
 }
 
 interface requestWrapperRequest {
