@@ -1,6 +1,6 @@
 {
   "name": "openwilma.js",
-  "version": "2.0.0",
+  "version": "2.0.0-alpha.1",
   "description": "OpenSource JavaScript client library for Wilma by Visma",
   "author": "Esinko <dev@esinko.net> (https://github.com/Esinko)",
   "contributors": [
