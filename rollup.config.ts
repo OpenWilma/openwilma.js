@@ -18,6 +18,15 @@ export default defineConfig({
             exports: "named",
             sourcemap: true,
         },
+        {
+            file: "./dist/index.global.js",
+            format: "umd",
+            name: "OpenWilma",
+            sourcemap: true,
+            globals: {
+                "cross-fetch": "CrossFetch",
+            },
+        },
     ],
     external: ["cross-fetch"],
     plugins: [cleaner({ targets: ["./dist"] }), typescript({ tsconfig: resolve(process.cwd(), "src", "tsconfig.json") })],
