@@ -1,23 +1,27 @@
 import type { APIResponses } from "./APIResponses";
 
 export interface Session {
-    account: {
+    account: Session.Account;
+    roles: Session.Role[];
+    session: Session.Info;
+    flags: string[];
+}
+
+export namespace Session {
+    interface Account {
         id: number;
         firstname: string;
         lastname: string;
         username: string;
         lastLogin: Date | null;
-    };
-    roles: Session.Role[];
-    session: {
+    }
+
+    interface Info {
         id: string;
         url: string;
         slug: string;
-    };
-    flags: string[];
-}
+    }
 
-export namespace Session {
     interface Role {
         name: string;
         type: APIResponses.RoleType;
@@ -26,11 +30,15 @@ export namespace Session {
         slug: string;
     }
 
+    type Flags = string[];
+
     interface Options {
         url: string;
         username: string;
         password: string;
         validateServer?: boolean;
-        flags?: [];
+        flags?: Flags;
     }
+
+    type RoleLike = Role | string | number;
 }
