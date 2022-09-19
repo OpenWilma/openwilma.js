@@ -1,68 +1,85 @@
 name: Continuous Integration
 
 on:
-    push:
-        branches:
-            - main
-    pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
 
 jobs:
-    linting:
-        name: Linting
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Project
-              uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
-            - name: Add ESLint Problem Matcher
-              run: echo "::add-matcher::.github/problemMatchers/eslint.json"
-            - name: Use Node.js v16
-              uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
-              with:
-                  node-version: 16
-                  cache: yarn
-                  registry-url: https://registry.npmjs.org/
-            - name: Install Dependencies
-              run: yarn --immutable
-            - name: Run ESLint
-              run: yarn lint --fix=false
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: Add ESLint Problem Matcher
+        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
+      - name: Use Node.js v16
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies
+        run: yarn --immutable
+      - name: Run ESLint
+        run: yarn lint --fix=false
 
-    testing:
-        name: Unit Tests
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Project
-              uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
-            - name: Use Node.js v16
-              uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
-              with:
-                  node-version: 16
-                  cache: yarn
-                  registry-url: https://registry.npmjs.org/
-            - name: Install Dependencies
-              run: yarn --immutable
-            - name: Run Tests
-              run: yarn test --coverage
-            - name: Store Code Coverage Report
-              uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
-              with:
-                  name: coverage
-                  path: coverage/
+  testing:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: Use Node.js v16
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies
+        run: yarn --immutable
+      - name: Run Tests
+        run: yarn test --coverage
+      - name: Store Code Coverage Report
+        uses: actions/upload-artifact@3cea5372237819ed00197afe530f5a7ea3e805c8 # tag=v3
+        with:
+          name: coverage
+          path: coverage/
 
-    building:
-        name: Building
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Project
-              uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
-            - name: Add TypeScript Problem Matcher
-              run: echo "::add-matcher::.github/problemMatchers/tsc.json"
-            - name: Use Node.js v16
-              uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
-              with:
-                  node-version: 16
-                  cache: yarn
-                  registry-url: https://registry.npmjs.org/
-            - name: Install Dependencies
-              run: yarn --immutable
-            - name: Build Code
-              run: yarn build
+  building:
+    name: Building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: Add TypeScript Problem Matcher
+        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
+      - name: Use Node.js v16
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies
+        run: yarn --immutable
+      - name: Build Code
+        run: yarn build
+
+  docs:
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: Use Node.js v16
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies
+        run: yarn --immutable
+      - name: Generate Documentation
+        run: yarn docs
