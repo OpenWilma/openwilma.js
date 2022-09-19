@@ -1,31 +1,40 @@
-import { request } from "../utils/request";
-import supportedVersions from "../supportedVersions.json"
+import fetch from "cross-fetch";
+import { supportedVersions } from "../supportedVersions";
+import type { APIResponses } from "../types/APIResponses";
 
 export async function listServers() {
-    const serverListRequest = await request("GET", "https://wilmahub.service.inschool.fi/wilmat", { json: true })
+    const serverListRequest = await fetch("https://wilmahub.service.inschool.fi/wilmat");
+
     if (serverListRequest.status === 200) {
-        const servers: any = serverListRequest.data
-        return servers.wilmat.map((server: any) => ({
+        const servers: APIResponses.WilmaList = await serverListRequest.json();
+
+        return servers.wilmat.map((server) => ({
             name: server.name,
             url: server.url,
-            formerUrl: server.formerUrl
-        }))
-    } else throw new Error("Failed to request list of Wilma servers")
+            formerUrl: server.formerUrl,
+        }));
+    }
+
+    throw new Error("Failed to request list of Wilma servers");
 }
 
 export async function validateServer(url: string) {
     // Verify server url
-    const servers = await listServers()
-    const urlIsValid = servers.filter((server: any) => server.url.includes(url)).length !== 0
+    const servers = await listServers();
+    const urlIsValid = servers.some((server) => server.url.includes(url));
 
     // Verify API version
     if (urlIsValid) {
-        const serverInfoRequest = await request("GET", `${url}/index_json`, { json: true })
+        const serverInfoRequest = await fetch(`${url}/index_json`);
+
         if (serverInfoRequest.status === 200) {
-            const info: any = serverInfoRequest.data
-            return supportedVersions.includes(info.ApiVersion)
-        } else throw new Error("Failed to connect to server")
+            const info: APIResponses.LoginFailed = await serverInfoRequest.json();
+
+            return supportedVersions.includes(info.ApiVersion);
+        }
+
+        throw new Error("Failed to connect to server");
     }
 
-    return false
+    return false;
 }
