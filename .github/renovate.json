@@ -1,0 +1,30 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": ["config:base", "helpers:pinGitHubActionDigests", ":semanticCommits", "group:allNonMajor", "group:recommended", ":prHourlyLimitNone"],
+    "labels": ["dependencies"],
+    "npm": {
+        "rangeStrategy": "bump",
+        "packageRules": [
+            {
+                "matchUpdateTypes": ["minor", "patch"],
+                "matchDepTypes": ["dependencies"],
+                "groupName": "all non-major dependencies",
+                "groupSlug": "all-non-major",
+                "semanticCommitType": "chore",
+                "semanticCommitScope": "deps"
+            },
+            {
+                "matchUpdateTypes": ["minor", "patch"],
+                "matchDepTypes": ["devDependencies"],
+                "groupName": "all non-major dev-dependencies",
+                "groupSlug": "all-non-major-dev",
+                "semanticCommitType": "chore",
+                "semanticCommitScope": "deps-dev"
+            },
+            {
+                "matchDepTypes": ["engines"],
+                "enabled": false
+            }
+        ]
+    }
+}

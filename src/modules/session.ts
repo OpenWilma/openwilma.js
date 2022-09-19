@@ -1,122 +1,129 @@
-import { request } from "../utils/request";
+import fetch from "cross-fetch";
 import { validateServer } from "./server";
+import type { Session } from "../types/Session";
+import type { APIResponses } from "../types/APIResponses";
 
-export async function create(options: SessionOptions): Promise<WilmaSession> {
-    if (!options.flags) options.flags = []
-
+export async function create(options: Session.Options): Promise<Session> {
+    if (!options.flags) options.flags = [];
     // Validate server
-    if (options.validateServer !== false && !await validateServer(options.url)) throw new Error("Unknown or unsupported Wilma server url")
+    if (options.validateServer !== false && !(await validateServer(options.url))) throw new Error("Unknown or unsupported Wilma server url");
 
     // Get session id
-    const sessionInitRequest = await request("GET", `${options.url}/index_json`, { json: true })
-    if (sessionInitRequest.status !== 200) throw new Error("Unable to get session id")
-    const sessionInit: any = sessionInitRequest.data
-    const loginSessionId = sessionInit.SessionID
+    const sessionInitRequest = await fetch(`${options.url}/index_json`);
 
+    if (sessionInitRequest.status !== 200) throw new Error("Unable to get session id");
+
+    const sessionInit: APIResponses.LoginFailed = await sessionInitRequest.json();
+    const loginSessionId = sessionInit.SessionID;
     // Login
     const loginParams = new URLSearchParams({
         Login: options.username,
         Password: options.password,
         SESSIONID: loginSessionId,
         CompleteJson: "",
-        format: "json"
-    })
-    const sessionLoginRequest = await request("POST", `${options.url}/index_json`, {
+        format: "json",
+    });
+
+    const sessionLoginRequest = await fetch(`${options.url}/index_json`, {
+        method: "POST",
         body: loginParams.toString(),
+        redirect: "manual",
         headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        }
-    })
-    if (sessionLoginRequest.headers.location.includes("loginfailed")) throw new Error("Failed to login. Check your account credentials and server url")
-    const sessionLoginRequestCookies: any = sessionLoginRequest.headers["set-cookie"]
-    let sessionId: string
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+    });
+
+    if ((sessionLoginRequest.headers.get("Location") ?? "loginfailed").includes("loginfailed")) {
+        throw new Error("Failed to login. Check your account credentials and server url");
+    }
+
+    const sessionLoginRequestCookies = sessionLoginRequest.headers.get("Set-Cookie");
+
+    if (!sessionLoginRequestCookies) throw new Error("No cookies found");
+
+    let sessionId: string;
+
     try {
-        sessionId = sessionLoginRequestCookies.filter((cookie: string) => cookie.startsWith("Wilma2SID="))[0].split("=")[1].split(";")[0]
+        console.log(sessionLoginRequestCookies);
+        [sessionId] = sessionLoginRequestCookies
+            .split(", ")
+            .filter((cookie) => cookie.startsWith("Wilma2SID="))[0]
+            .split("=")[1]
+            .split(";");
     } catch (_) {
-        throw new Error("Failed to parse session cookies")
+        throw new Error("Failed to parse session cookies");
     }
 
     // Fetch user details
-    const accountInfoRequest = await request("GET", `${options.url}/api/v1/accounts/me`, {
+    const accountInfoRequest = await fetch(`${options.url}/api/v1/accounts/me`, {
         headers: {
-            "Cookie": `Wilma2SID=${sessionId}`
+            Cookie: `Wilma2SID=${sessionId}`,
         },
-        stringify: true
-    })
-    const accountRolesRequest = await request("GET", `${options.url}/api/v1/accounts/me/roles`, {
-        headers: {
-            "Cookie": `Wilma2SID=${sessionId}`
-        },
-        stringify: true
-    })
+    });
 
-    const account = {
-        id: null,
-        firstname: null,
-        lastname: null,
+    const accountRolesRequest = await fetch(`${options.url}/api/v1/accounts/me/roles`, {
+        headers: {
+            Cookie: `Wilma2SID=${sessionId}`,
+        },
+    });
+
+    const account: {
+        id: number;
+        firstname: string;
+        lastname: string;
+        username: string;
+        lastLogin: number;
+    } = {
+        id: null!,
+        firstname: null!,
+        lastname: null!,
         username: options.username,
-        lastLogin: 0
-    }
-    let roles = []
-    let slug = ""
+        lastLogin: 0,
+    };
+
+    let roles: Session.Role[] = [];
+    let slug = "";
 
     // Handle roles
-    if (accountRolesRequest.status !== 200) throw new Error("Unable to fetch essential account role information")
+    if (accountRolesRequest.status !== 200) throw new Error("Unable to fetch essential account role information");
     try {
-        const accountRoleData = JSON.parse(accountRolesRequest.data.toString()).payload // .toString is useless, but compiler wants it, what a piece of crap...
+        const accountRoleData = (await accountRolesRequest.json()).payload as APIResponses.AccountRole[];
+
         roles = accountRoleData
-            .filter((role: any) => role.type !== "passwd") // Note: Unsure if these are needed
-            .map((role: any, index: number) => ({
+            .filter((role) => role.type !== "passwd") // Note: Unsure if these are needed
+            .map((role, index) => ({
                 name: role.name,
-                type: role.type,
+                type: role.type as APIResponses.RoleType,
                 isDefault: index === 0,
                 id: role.primusId,
                 slug: role.slug.replace(/\\/g, ""),
                 formkey: role.formKey,
-                secret: null
-            }))
-        slug = roles[0].slug
-    } catch(_) {
-        throw new Error("Failed to parse account role data")
+            }));
+
+        slug = roles[0].slug;
+    } catch (_) {
+        throw new Error("Failed to parse account role data");
     }
 
     // Handle general info
     if (accountInfoRequest.status === 403) {
         // We are dealing with an old account type, first role is default
-        account.firstname = roles[0].name.trim().split(" ")[0]
-        account.lastname = roles[0].name.trim().split(" ")[1]
-        account.id = roles[0].id
+        [account.firstname, account.lastname] = roles[0].name.trim().split(" ");
+        account.id = roles[0].id;
         // Note: slug already set
     } else if (accountInfoRequest.status === 200) {
-        const accountInfo = JSON.parse(accountInfoRequest.data.toString()).payload // .toString is useless, but compiler wants it, what a piece of crap...
-        
+        const accountInfo = (await accountInfoRequest.json()).payload as APIResponses.AccountInfo;
+
         // Check if MFA is enabled
         if (accountInfo.multiFactorAuthentication) {
-            throw new Error("Multi-factor authentication is not yet supported")
+            throw new Error("Multi-factor authentication is not yet supported");
         }
 
-        account.firstname = accountInfo.firstname
-        account.lastname = accountInfo.lastname
-        account.lastLogin = Date.parse(accountInfo.lastLogin)
-        account.id = account.id
-    } else throw new Error("Unable to get essential account information")
-
-    // Acquire messaging secrets for all roles
-    // TODO: Could this be a permissions issue? As in: are messages always available
-    // @ts-ignore <- TODO: THIS IS A CRIME! FIX THIS!
-    if (!options.flags.includes("disable-fetch-secret")) {
-        for (const role of roles) {
-            const secretRequest = await request("GET", `${options.url}${role.slug}/messages`,{
-                headers: {
-                    "Cookie": `Wilma2SID=${sessionId}`
-                },
-                stringify: true
-            })
-            if (secretRequest.status !== 200) throw new Error("Unable to fetch the secret for a role")
-            role.secret = secretRequest.data.toString().split('name="secret" value="')[1].split('"')[0]
-        }
-
-    } else console.warn(`OpenWilma_js: Experimental flag "disable-fetch-secret" is set. Messaging functionality is disabled!`)
+        account.firstname = accountInfo.firstname;
+        account.lastname = accountInfo.lastname;
+        account.lastLogin = Date.parse(accountInfo.lastLogin);
+        account.id = accountInfo.id;
+    } else throw new Error("Unable to get essential account information");
 
     return {
         account: {
@@ -124,14 +131,14 @@ export async function create(options: SessionOptions): Promise<WilmaSession> {
             firstname: account.firstname,
             lastname: account.lastname,
             username: account.username,
-            lastLogin: account.lastLogin !== 0 ? new Date(account.lastLogin) : null
+            lastLogin: account.lastLogin === 0 ? null : new Date(account.lastLogin),
         },
         roles,
         session: {
             id: sessionId,
             url: options.url,
-            slug: slug
+            slug,
         },
-        flags: options.flags
-    }
+        flags: options.flags,
+    };
 }
