@@ -14,8 +14,8 @@
 OpenSource JavaScript client library for Wilma by Visma. Built with minimal dependencies.
 
 > **Warning**
-> Not ready for use
-> v2 is very much in progress and every old version is deprecated and probably broken.
+> Not ready for use!
+> v2 is very much a Work-in-Progress and every old version is considered to be deprecated and probably broken.
 
 ### Compatibility
 
