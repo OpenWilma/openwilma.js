@@ -117,7 +117,6 @@ export async function create(options: Session.Options): Promise<Session> {
     let sessionId: string;
 
     try {
-        console.log(sessionLoginRequestCookies);
         [sessionId] = sessionLoginRequestCookies
             .split(", ")
             .filter((cookie) => cookie.startsWith("Wilma2SID="))[0]
