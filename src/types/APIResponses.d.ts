@@ -1,5 +1,5 @@
 export namespace APIResponses {
-    interface WilmaList {
+    export interface WilmaList {
         wilmat: {
             url: string;
             name: string;
@@ -11,13 +11,13 @@ export namespace APIResponses {
         }[];
     }
 
-    interface LoginFailed {
+    export interface LoginFailed {
         LoginResult: "Failed";
         SessionID: string;
         ApiVersion: number;
     }
 
-    enum RoleType {
+    export enum RoleType {
         teacher = "teacher",
         student = "student",
         personnel = "personnel",
@@ -31,7 +31,7 @@ export namespace APIResponses {
         applicantguardian = "applicantguardian",
     }
 
-    interface AccountRole {
+    export interface AccountRole {
         name: string;
         type: string;
         primusId: number;
@@ -44,7 +44,7 @@ export namespace APIResponses {
         }[];
     }
 
-    interface AccountInfo {
+    export interface AccountInfo {
         id: number;
         firstname: string;
         lastname: string;

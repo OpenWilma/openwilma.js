@@ -2,6 +2,7 @@ import { resolve } from "path";
 import { defineConfig } from "rollup";
 import cleaner from "rollup-plugin-cleaner";
 import typescript from "rollup-plugin-typescript2";
+import versionInjector from "rollup-plugin-version-injector";
 
 export default defineConfig({
     input: "src/index.ts",
@@ -29,5 +30,9 @@ export default defineConfig({
         },
     ],
     external: ["cross-fetch"],
-    plugins: [cleaner({ targets: ["./dist"] }), typescript({ tsconfig: resolve(process.cwd(), "src", "tsconfig.json") })],
+    plugins: [
+        cleaner({ targets: ["./dist"] }),
+        versionInjector({ injectInTags: { fileRegexp: /\.(js|mjs)$/, tagId: "VI", dateFormat: "yyyy-mm-dd" }, logLevel: "warn" }),
+        typescript({ tsconfig: resolve(process.cwd(), "src", "tsconfig.json") }),
+    ],
 });
