@@ -85,11 +85,15 @@ export class OpenWilma {
 
         let roles: Session.Role[] = [];
         let slug = "";
+        let roleControlRequired = false;
 
         // Handle roles
         if (accountRolesRequest.status !== 200) throw new Error("Unable to fetch essential account role information");
         try {
             const accountRoleData = (await accountRolesRequest.json()).payload as APIResponses.AccountRole[];
+
+            // Role control is required, default role is index 1 in list
+            if (accountRoleData.filter((role) => role.type === "passwd").length !== 0) roleControlRequired = true;
 
             roles = accountRoleData
                 .filter((role) => role.type !== "passwd") // Note: Unsure if these are needed
@@ -122,10 +126,17 @@ export class OpenWilma {
                 throw new Error("Multi-factor authentication is not yet supported");
             }
 
-            account.firstname = accountInfo.firstname;
-            account.lastname = accountInfo.lastname;
+            if (roleControlRequired) {
+                // Index 0 is index 1, passwd type in original index 0 gets removed
+                [account.firstname, account.lastname] = roles[0].name.trim().split(" ");
+                account.id = roles[0].id;
+            } else {
+                account.firstname = accountInfo.firstname;
+                account.lastname = accountInfo.lastname;
+                account.id = accountInfo.id;
+            }
+
             account.lastLogin = Date.parse(accountInfo.lastLogin);
-            account.id = accountInfo.id;
         } else throw new Error("Unable to get essential account information");
 
         return new Session({
