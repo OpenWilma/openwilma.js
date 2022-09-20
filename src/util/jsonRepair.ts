@@ -10,7 +10,7 @@ export default function repair(json: string): string {
             .replace(/(['"])?([a-z0-9A-Z_]+)(['"])?\s*:/g, '"$2": ')
 
             // Turn "&tag&" back into ":"
-            .replace(/&tag&"/g, ":")
+            .replace(/&tag&/g, ":")
 
             // Remove semicolon at the end
             .replace(/;$/g, "")
