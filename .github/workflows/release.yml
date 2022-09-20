@@ -55,5 +55,5 @@ jobs:
           git checkout -b docs
           git add .
           git commit -am "Pages build for ${{ github.action_ref }}"
-          git remote add origin "${{ github.repositoryUrl }}"
+          git remote add origin "https://github.com/${{ github.repository }}.git"
           git push --force origin docs
