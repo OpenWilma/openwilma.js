@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
-import { validateServer } from "./server";
-import type { Session } from "../types/Session";
 import type { APIResponses } from "../types/APIResponses";
+import type { Session } from "../types/Session";
+import { validateServer } from "./server";
 
 class SessionMethods implements Session {
     public account!: Session.Account;
