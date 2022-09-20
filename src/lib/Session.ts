@@ -1,4 +1,6 @@
 import type { APIResponses } from "../types/APIResponses";
+import type { Schedule } from "../types/Schedule";
+import repair from "../util/jsonRepair";
 
 export namespace Session {
     export interface Data {
@@ -115,5 +117,111 @@ export class Session implements Session.Data {
         };
 
         this.session.slug = roleToSelect.slug;
+    }
+
+    // Schedules
+
+    public async getSchedule(date: Date): Promise<Schedule> {
+        // Format date parameter
+        if (!(date instanceof Date)) throw new Error("Invalid date");
+
+        const dateParameter = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+        // Fetch the schedule
+        const scheduleRequest = await fetch(`${this.session.url}${this.session.slug}/schedule?date=${dateParameter}`, {
+            method: "GET",
+            headers: {
+                Cookie: `Wilma2SID=${this.session.id}`,
+            },
+        });
+
+        if (scheduleRequest.status === 403) throw new Error("Unauthorized");
+        if (scheduleRequest.status !== 200) throw new Error("Unable to fetch schedule");
+
+        // Parse the schedule
+        let scheduleJson: APIResponses.ScheduleResponse;
+
+        try {
+            scheduleJson = JSON.parse(repair((await scheduleRequest.text()).split("var eventsJSON = ")[1].split("\n")[0].trim()));
+        } catch (_) {
+            throw new Error("Failed to parse schedule data");
+        }
+
+        const schedule: Schedule.ScheduleEvent[] = scheduleJson.Events.map((event) => ({
+            id: parseInt(event.Id, 10),
+            date: {
+                start: new Date(
+                    Date.parse(`${event.Date.split(".")[1]}${event.Date.split(".")[0]}${event.Date.split(".")[2]}`) + (event.Start / 60) * 1000
+                ),
+                end: new Date(
+                    Date.parse(`${event.Date.split(".")[1]}${event.Date.split(".")[0]}${event.Date.split(".")[2]}`) + (event.End / 60) * 1000
+                ),
+                length: event.End / 60 - event.Start / 60,
+            },
+            shortName: Object.keys(event.Text)
+                .map((line) => event.Text[line])
+                .join("\n"),
+            name: Object.keys(event.LongText)
+                .map((line) => event.LongText[line])
+                .join("\n"),
+            color: `#${event.Color}`,
+            gridPosition: {
+                x: event.X1 === 0 ? 0 : event.X1 * 0.0001,
+                y: event.Y1 === 0 ? event.Y1 : event.Y1 + 1,
+            },
+            details: {
+                info: Object.keys(event.Lisatieto)
+                    .map((line) => event.Lisatieto[line].trim())
+                    .join("\n"),
+                students: parseInt(event.OppCount["0"].split(" ")[0], 10),
+                notes: Object.keys(event.Muistiinpanot).map((line) => event.Muistiinpanot[line].trim()),
+                teachers: Object.keys(event.OpeInfo)
+                    .map((line1) =>
+                        Object.keys(event.OpeInfo[line1]).map((line2) => ({
+                            id: event.OpeInfo[line1][line2].kortti,
+                            accountId: event.OpeInfo[line1][line2].tunniste,
+                            callsign: event.OpeInfo[line1][line2].lyhenne,
+                            name: event.OpeInfo[line1][line2].nimi,
+                        }))
+                    )
+                    .flat(1),
+                rooms: Object.keys(event.Huoneet)
+                    .map((line1) =>
+                        Object.keys(event.Huoneet[line1]).map((line2) => ({
+                            id: event.Huoneet[line1][line2].kortti,
+                            shortName: event.Huoneet[line1][line2].lyhenne,
+                            name: event.Huoneet[line1][line2].nimi,
+                        }))
+                    )
+                    .flat(1),
+                vvt: event.Vvt,
+                creator: event.Lisaaja.Nimi,
+                editor: event.Muokkaaja.Nimi,
+                visible: event.NotInGrid !== 0,
+            },
+        }));
+
+        // Get terms
+        const termsRequest = await fetch(`${this.session.url}${this.session.slug}/schedule/export/students/${this.account.id}/`, {
+            method: "GET",
+            headers: {
+                Cookie: `Wilma2SID=${this.session.id}`,
+            },
+        });
+
+        if (termsRequest.status === 403) throw new Error("Unauthorized");
+        if (termsRequest.status !== 200) throw new Error("Unable to fetch periods");
+
+        // Parse terms
+        const termsData = (await termsRequest.json()) as APIResponses.Terms;
+        const terms: Schedule.Term[] = termsData.Terms.map((term) => ({
+            name: term.Name,
+            startDate: new Date(Date.parse(term.StartDate)),
+            endDate: new Date(Date.parse(term.EndDate)),
+        }));
+
+        return {
+            schedule,
+            terms,
+        };
     }
 }
