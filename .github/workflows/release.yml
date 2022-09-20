@@ -50,10 +50,10 @@ jobs:
         run: |
           cd ./docs
           git init
+          git checkout -b docs
           git config --global user.name "GitHub Actions"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b docs
           git add .
           git commit -am "Pages build for ${{ github.action_ref }}"
-          git remote add origin "https://github.com/${{ github.repository }}.git"
-          git push --force origin docs
+          git remote add origin "https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}.git"
+          git push --force -u origin docs
