@@ -28,3 +28,31 @@ jobs:
         run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  docs:
+    name: Publish docs to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: publish
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b # tag=v3
+      - name: Use Node.js v16
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93 # tag=v3
+        with:
+          node-version: 16
+          cache: yarn
+          registry-url: https://registry.npmjs.org/
+      - name: Install Dependencies
+        run: yarn --immutable
+      - name: Create docs
+        run: yarn docs
+      - name: Deploy docs
+        run: |
+          cd ./docs
+          git init
+          git config user.name "GitHub Actions"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -am "Pages build for ${{ github.action_ref }}"
+          git remote add origin "${{ github.repositoryUrl }}"
+          git push --force origin docs
