@@ -122,10 +122,7 @@ export class Session implements Session.Data {
 
     // Schedules
 
-    public async getSchedule(date: Date): Promise<Schedule> {
-        // Format date parameter
-        if (!(date instanceof Date)) throw new Error("Invalid date");
-
+    public async getSchedule(date: Date = new Date()): Promise<Schedule> {
         const dateParameter = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
         // Fetch the schedule
         const scheduleRequest = await fetch(`${this.session.url}${this.session.slug}/schedule?date=${dateParameter}`, {
