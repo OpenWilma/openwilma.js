@@ -50,8 +50,8 @@ jobs:
         run: |
           cd ./docs
           git init
-          git config user.name "GitHub Actions"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b docs
           git add .
           git commit -am "Pages build for ${{ github.action_ref }}"
