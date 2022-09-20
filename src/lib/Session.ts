@@ -1,3 +1,4 @@
+import fetch from "cross-fetch";
 import type { APIResponses } from "../types/APIResponses";
 import type { Schedule } from "../types/Schedule";
 import repair from "../util/jsonRepair";
