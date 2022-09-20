@@ -20,11 +20,11 @@ export default defineConfig({
         },
         {
             file: "./dist/index.global.js",
-            format: "umd",
+            format: "iife",
             name: "OpenWilma",
             sourcemap: true,
             globals: {
-                "cross-fetch": "CrossFetch",
+                "cross-fetch": "fetch.bind(globalThis)",
             },
         },
     ],
