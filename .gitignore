@@ -5,6 +5,7 @@ dist/
 build/
 docs/
 coverage/
+dev/
 
 *.heapsnapshot
 *.log
