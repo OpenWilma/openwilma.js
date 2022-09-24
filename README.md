@@ -28,8 +28,8 @@ This library is still in development.
 #### Current feature coverage
 
 -   [x] Session creation
--   [ ] Session keep-alive
--   [ ] Role control
+-   [x] Session keep-alive
+-   [x] Role control
 -   [ ] Messages
     -   [ ] Listing
     -   [ ] Reading
@@ -46,7 +46,7 @@ This library is still in development.
         -   [ ] Leaving
         -   [ ] Creating
 -   [ ] Schedules
-    -   [ ] User schedule
+    -   [x] User schedule
     -   [ ] Room schedules
 -   [ ] News
 -   [ ] Courses
@@ -58,6 +58,8 @@ This library is still in development.
 -   [ ] Attendance
     -   [ ] Resolving
     -   [ ] Notifying
+    -   [ ] Creating
+    -   [ ] Editing
 -   [ ] Decisions and applications
 -   [ ] Printouts
 -   [ ] Feedback
