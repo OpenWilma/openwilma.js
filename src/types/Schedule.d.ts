@@ -28,8 +28,8 @@ export namespace Schedule {
             // book: []; // TODO: Needs more research
             rooms: Room[];
             vvt: string;
-            editor: any;
-            creator: any;
+            editor: string | null;
+            creator: string | null;
             visible: boolean;
         };
     }

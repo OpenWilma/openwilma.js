@@ -99,8 +99,8 @@ export namespace APIResponses {
         OpeInfo: { [key: lineNumber]: { [key: lineNumber]: Teacher } };
         Henkilot: { [key: lineNumber]: string };
         HenkiloInfo: any; // Unknown
-        Huoneet: { [key: lineNumber]: { [key: lineNumber]: Room } }; // Unknown
-        HuoneInfo: any; // Unknown
+        Huoneet: { [key: lineNumber]: { [key: lineNumber]: string } }; // Unknown
+        HuoneInfo: { [key: lineNumber]: { [key: lineNumber]: Room } }; // Unknown
         MuutRes: any; // Unknown
         MuutResInfo: any; // Unknown
         Vvt: string;

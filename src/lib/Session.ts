@@ -1,7 +1,7 @@
-import { fetch } from "./fetch";
 import type { APIResponses } from "../types/APIResponses";
 import type { Schedule } from "../types/Schedule";
 import repair from "../util/jsonRepair";
+import { fetch } from "./fetch";
 
 export namespace Session {
     export interface Data {
@@ -122,7 +122,7 @@ export class Session implements Session.Data {
 
     // Schedules
 
-    public async getSchedule(date: Date = new Date()): Promise<Schedule> {
+    public async getSchedule(date: Date = new Date(), timezone = 3): Promise<Schedule> {
         const dateParameter = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
         // Fetch the schedule
         const scheduleRequest = await fetch(`${this.session.url}${this.session.slug}/schedule?date=${dateParameter}`, {
@@ -148,12 +148,16 @@ export class Session implements Session.Data {
             id: parseInt(event.Id, 10),
             date: {
                 start: new Date(
-                    Date.parse(`${event.Date.split(".")[1]}${event.Date.split(".")[0]}${event.Date.split(".")[2]}`) + (event.Start / 60) * 1000
+                    Date.parse(`${event.Date.split(".")[1]}.${event.Date.split(".")[0]}.${event.Date.split(".")[2]}`) +
+                        event.Start * 60 * 1000 +
+                        timezone * 60 * 60 * 1000
                 ),
                 end: new Date(
-                    Date.parse(`${event.Date.split(".")[1]}${event.Date.split(".")[0]}${event.Date.split(".")[2]}`) + (event.End / 60) * 1000
+                    Date.parse(`${event.Date.split(".")[1]}.${event.Date.split(".")[0]}.${event.Date.split(".")[2]}`) +
+                        event.End * 60 * 1000 +
+                        timezone * 60 * 60 * 1000
                 ),
-                length: event.End / 60 - event.Start / 60,
+                length: (event.End / 60 - event.Start / 60) * 60,
             },
             shortName: Object.keys(event.Text)
                 .map((line) => event.Text[line])
@@ -182,18 +186,18 @@ export class Session implements Session.Data {
                         }))
                     )
                     .flat(1),
-                rooms: Object.keys(event.Huoneet)
+                rooms: Object.keys(event.HuoneInfo)
                     .map((line1) =>
-                        Object.keys(event.Huoneet[line1]).map((line2) => ({
-                            id: event.Huoneet[line1][line2].kortti,
-                            shortName: event.Huoneet[line1][line2].lyhenne,
-                            name: event.Huoneet[line1][line2].nimi,
+                        Object.keys(event.HuoneInfo[line1]).map((line2) => ({
+                            id: event.HuoneInfo[line1][line2].kortti,
+                            shortName: event.HuoneInfo[line1][line2].lyhenne,
+                            name: event.HuoneInfo[line1][line2].nimi,
                         }))
                     )
                     .flat(1),
                 vvt: event.Vvt,
-                creator: event.Lisaaja.Nimi,
-                editor: event.Muokkaaja.Nimi,
+                creator: event.Lisaaja.Nimi.split("  ")[1] ?? null,
+                editor: event.Muokkaaja.Nimi.split("  ")[1] ?? null,
                 visible: event.NotInGrid !== 0,
             },
         }));
