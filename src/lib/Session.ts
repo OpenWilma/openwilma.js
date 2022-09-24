@@ -2,6 +2,7 @@ import type { APIResponses } from "../types/APIResponses";
 import type { Schedule } from "../types/Schedule";
 import repair from "../util/jsonRepair";
 import { fetch } from "./fetch";
+import { login } from "./Login";
 
 export namespace Session {
     export interface Data {
@@ -44,17 +45,34 @@ export namespace Session {
     export type RoleLike = Role | string | number;
 }
 
+const passwords: { [key: string]: string } = {};
+
 export class Session implements Session.Data {
     public account!: Session.Account;
     public roles!: Session.Role[];
     public session!: Session.Info;
     public flags!: Session.Flags;
+    private options!: Session.Options;
+    private passwordId!: string;
 
-    public constructor(init?: Session.Data) {
+    public constructor(init?: Session.Data, options?: Session.Options) {
         if (init) Object.assign(this, init);
+        if (options) {
+            // TODO: Does this have any effect?
+            // The idea of this whole mess is to prevent the password being accessed again directly from the session class
+            // In theory; without reading the whole heap, the password cannot be accessed from a context which can access the session
+            this.passwordId = new Array(10)
+                .fill(0)
+                .map(() => Math.floor(Math.random() * 10))
+                .join("");
+
+            passwords[this.passwordId] = options.password;
+            options.password = this.passwordId;
+
+            this.options = options;
+        }
     }
 
-    // TODO: implement automatic reconnect on session expiry
     // TODO: implement the rest of the API
 
     /**
@@ -123,6 +141,8 @@ export class Session implements Session.Data {
     // Schedules
 
     public async getSchedule(date: Date = new Date(), timezone = 3): Promise<Schedule> {
+        await this.refresh(); // Refresh session if needed
+
         const dateParameter = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
         // Fetch the schedule
         const scheduleRequest = await fetch(`${this.session.url}${this.session.slug}/schedule?date=${dateParameter}`, {
@@ -225,5 +245,33 @@ export class Session implements Session.Data {
             schedule,
             terms,
         };
+    }
+
+    private async refresh(): Promise<void> {
+        const overviewRequest = await fetch(`${this.session.url}${this.session.slug}/overview`, {
+            method: "GET",
+            headers: {
+                Cookie: `Wilma2SID=${this.session.id}`,
+            },
+        });
+
+        if (overviewRequest.status !== 200) throw new Error("Received an unexpected status code while refreshing session state");
+
+        const sessionState = (await overviewRequest.json()) as APIResponses.OverviewLoginResult;
+
+        if (sessionState.LoginResult === false) {
+            try {
+                const options = Object.assign({}, this.options);
+
+                options.password = passwords[this.passwordId];
+
+                const newSession = await login(this.options, this.session.url);
+
+                // TODO: Should refreshing the current login we supported?
+                if (newSession.roles !== this.roles) throw new Error("Account role information changed since login");
+            } catch (_) {
+                throw new Error("Failed to refresh session");
+            }
+        }
     }
 }

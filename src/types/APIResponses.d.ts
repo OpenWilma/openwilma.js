@@ -143,4 +143,8 @@ export namespace APIResponses {
         Schedule: [];
         Terms: Term[];
     }
+
+    interface OverviewLoginResult {
+        LoginResult: boolean | undefined;
+    }
 }
